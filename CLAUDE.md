@@ -5,13 +5,13 @@
 ```bash
 pip install -e ".[dev]"
 pytest                    # full suite
-retrace --help            # CLI entry point
-retrace scan tests/fixtures/sample.jpg  # quick smoke test
+pcb2bom --help            # CLI entry point
+pcb2bom scan tests/fixtures/sample.jpg  # quick smoke test
 ```
 
 ## Architecture
 
-Python package (`src/retrace/`) with Click CLI. Pipeline-based: ingest -> detect -> OCR -> trace -> identify -> analyze -> export.
+Python package (`src/pcb2bom/`) with Click CLI. Pipeline-based: ingest -> detect -> OCR -> trace -> identify -> analyze -> export.
 
 ### Core Modules
 
@@ -44,5 +44,5 @@ Python package (`src/retrace/`) with Click CLI. Pipeline-based: ingest -> detect
 - Optional ML deps: ultralytics, easyocr, gradio are all optional — core works with just numpy + opencv
 - FCC/iFixit requests must include 1s delay between calls
 - No firmware files, exploit code, or vulnerability research in this repo
-- Models auto-download on first use to ~/.cache/retrace/
+- Models auto-download on first use to ~/.cache/pcb2bom/
 - Plugin system uses Python entry points for discovery

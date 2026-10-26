@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from retrace.core.pipeline import AnalysisResult, Component
-from retrace.plugins.builtin.boot_mode import (
+from pcb2bom.core.pipeline import AnalysisResult, Component
+from pcb2bom.plugins.builtin.boot_mode import (
     BootModeAnalyzer,
     detect_boot_mode_pins,
 )

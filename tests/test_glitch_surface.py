@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from retrace.core.pipeline import AnalysisResult, Component
-from retrace.plugins.builtin.glitch_surface import (
+from pcb2bom.core.pipeline import AnalysisResult, Component
+from pcb2bom.plugins.builtin.glitch_surface import (
     _PROXIMITY_PX,
     GlitchSurfaceAnalyzer,
     _distance,

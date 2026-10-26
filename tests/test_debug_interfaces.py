@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from retrace.core.pipeline import AnalysisResult, Component
-from retrace.plugins.builtin.debug_interfaces import (
+from pcb2bom.core.pipeline import AnalysisResult, Component
+from pcb2bom.plugins.builtin.debug_interfaces import (
     DebugInterfaceAnalyzer,
     detect_debug_interfaces,
 )

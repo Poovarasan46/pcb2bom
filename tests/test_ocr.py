@@ -1,4 +1,4 @@
-"""Tests for retrace.detection.ocr — chip marking OCR."""
+"""Tests for pcb2bom.detection.ocr — chip marking OCR."""
 
 from __future__ import annotations
 
@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from retrace.core.pipeline import Component
-from retrace.detection import ocr as ocr_mod
-from retrace.detection.ocr import (
+from pcb2bom.core.pipeline import Component
+from pcb2bom.detection import ocr as ocr_mod
+from pcb2bom.detection.ocr import (
     _crop_component,
     _run_ocr,
     read_markings,

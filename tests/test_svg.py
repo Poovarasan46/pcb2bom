@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace
-from retrace.export.svg import (
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
+from pcb2bom.export.svg import (
     _classify_net,
     _edge_point,
     _render_zones,
@@ -1293,7 +1293,7 @@ class TestBomPanelIntelBranches:
                                marking="STM32F103")
         result = _make_result(components=[comp])
         # Patch the _LOOKUP dict on the matcher module so the lookup raises inside svg.py
-        with patch("retrace.identification.matcher._LOOKUP",
+        with patch("pcb2bom.identification.matcher._LOOKUP",
                    new_callable=lambda: type("RaisingDict", (), {
                        "get": staticmethod(lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("broken")))
                    })):
@@ -1309,7 +1309,7 @@ class TestSecurityPanelEmpty:
     """Line 584 — _render_security_panel returns '' for empty findings list."""
 
     def test_no_security_findings_no_security_panel(self):
-        from retrace.export.svg import _render_security_panel
+        from pcb2bom.export.svg import _render_security_panel
         result = _render_security_panel([], 800, 600)
         assert result == ""
 
@@ -1329,7 +1329,7 @@ class TestBusTopologyNoNodes:
     """Line 1144 — bus topology returns '' when no nodes found in connected_ids."""
 
     def test_bus_edges_but_no_matching_comps_returns_empty(self):
-        from retrace.export.svg import generate_bus_topology_svg
+        from pcb2bom.export.svg import generate_bus_topology_svg
         # SPI flash marking creates a bus edge, but to_component is missing from result
         c1 = _make_component("U1", "ic", (10, 10, 50, 50), marking="SPI flash memory")
         t = Trace(id="T1", points=[], width_px=1.0,
@@ -1397,17 +1397,17 @@ class TestPowerTreeRegulatorLabels:
         # Patch sys.modules to make the import fail for lookup_security_intel
         import sys
         # Remove the module from sys.modules to force the ImportError path
-        matcher_backup = sys.modules.get("retrace.identification.matcher")
+        matcher_backup = sys.modules.get("pcb2bom.identification.matcher")
         try:
-            sys.modules["retrace.identification.matcher"] = None  # type: ignore
+            sys.modules["pcb2bom.identification.matcher"] = None  # type: ignore
             svg = generate_power_tree_svg(result)
         except Exception:
             svg = ""
         finally:
             if matcher_backup is not None:
-                sys.modules["retrace.identification.matcher"] = matcher_backup
-            elif "retrace.identification.matcher" in sys.modules:
-                del sys.modules["retrace.identification.matcher"]
+                sys.modules["pcb2bom.identification.matcher"] = matcher_backup
+            elif "pcb2bom.identification.matcher" in sys.modules:
+                del sys.modules["pcb2bom.identification.matcher"]
         assert isinstance(svg, str)
 
     def test_power_tree_voltage_from_value_attr(self):

@@ -7,7 +7,7 @@ import math
 import numpy as np
 import pytest
 
-from retrace.analysis.probe_advisor import (
+from pcb2bom.analysis.probe_advisor import (
     Component,
     Measurement,
     ProbeAdvisor,

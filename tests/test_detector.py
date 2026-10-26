@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from retrace.core.pipeline import Component
+from pcb2bom.core.pipeline import Component
 
 # ---------------------------------------------------------------------------
 # Import smoke test (no ultralytics required)
@@ -22,7 +22,7 @@ def test_detector_module_importable():
     with patch.dict(sys.modules, {"ultralytics": None}):
         # Re-importing after patching sys.modules may not reload, but we can
         # verify the module was already importable at collection time.
-        import retrace.detection.detector  # noqa: F401 — just checking it exists
+        import pcb2bom.detection.detector  # noqa: F401 — just checking it exists
     assert True
 
 
@@ -35,7 +35,7 @@ def test_yolo_detector_raises_import_error_when_ultralytics_missing():
     # Remove ultralytics from sys.modules so the conditional import inside
     # _load_model fails.
     with patch.dict(sys.modules, {"ultralytics": None}):
-        from retrace.detection.detector import YOLODetector
+        from pcb2bom.detection.detector import YOLODetector
         with pytest.raises(ImportError) as exc_info:
             YOLODetector()
 
@@ -47,7 +47,7 @@ def test_yolo_detector_raises_import_error_when_ultralytics_missing():
 def test_yolo_detector_import_error_message_content():
     """The ImportError message should mention how to install the package."""
     with patch.dict(sys.modules, {"ultralytics": None}):
-        from retrace.detection.detector import YOLODetector
+        from pcb2bom.detection.detector import YOLODetector
         with pytest.raises(ImportError) as exc_info:
             YOLODetector()
 
@@ -108,7 +108,7 @@ def test_detect_returns_list_of_components():
         # Must reimport to pick up the patched module
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model_path = "yolov8n.pt"
@@ -147,7 +147,7 @@ def test_detect_maps_class_index_to_label():
         with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
             import importlib
 
-            import retrace.detection.detector as det_mod
+            import pcb2bom.detection.detector as det_mod
             importlib.reload(det_mod)
             detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
             detector._model = fake_model
@@ -170,7 +170,7 @@ def test_detect_unknown_class_index_produces_class_label():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model
@@ -192,7 +192,7 @@ def test_detect_returns_empty_when_no_boxes():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model
@@ -208,7 +208,7 @@ def test_detect_returns_empty_when_model_is_none():
     with patch.dict(sys.modules, {"ultralytics": MagicMock()}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = None
@@ -229,7 +229,7 @@ def test_detect_handles_predict_exception():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model
@@ -252,7 +252,7 @@ def test_detect_synthetic_rgb_image():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model
@@ -279,7 +279,7 @@ def test_component_id_is_unique():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model
@@ -307,7 +307,7 @@ def test_load_model_success_no_device():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
 
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
@@ -332,7 +332,7 @@ def test_load_model_success_with_device():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
 
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
@@ -364,7 +364,7 @@ def test_detect_skips_result_with_none_boxes():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model
@@ -391,7 +391,7 @@ def test_detect_mixed_none_and_valid_boxes():
     with patch.dict(sys.modules, {"ultralytics": fake_ultra}):
         import importlib
 
-        import retrace.detection.detector as det_mod
+        import pcb2bom.detection.detector as det_mod
         importlib.reload(det_mod)
         detector = det_mod.YOLODetector.__new__(det_mod.YOLODetector)
         detector._model = fake_model

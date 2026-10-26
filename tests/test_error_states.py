@@ -13,11 +13,11 @@ import numpy as np
 import pytest
 import requests as req
 
-from retrace.core.pipeline import Pipeline
-from retrace.detection.ocr import _crop_component, _run_ocr
-from retrace.identification.matcher import _best_fuzzy_match, lookup_part
-from retrace.sources.fcc import download_fcc_photos, search_fcc
-from retrace.sources.ifixit import download_guide_images, search_ifixit
+from pcb2bom.core.pipeline import Pipeline
+from pcb2bom.detection.ocr import _crop_component, _run_ocr
+from pcb2bom.identification.matcher import _best_fuzzy_match, lookup_part
+from pcb2bom.sources.fcc import download_fcc_photos, search_fcc
+from pcb2bom.sources.ifixit import download_guide_images, search_ifixit
 
 # ---------------------------------------------------------------------------
 # sources/fcc.py — network and I/O error states
@@ -28,7 +28,7 @@ def test_search_fcc_http_error_returns_empty():
     mock_resp = MagicMock()
     mock_resp.raise_for_status.side_effect = req.HTTPError("404 Not Found")
 
-    with patch("retrace.sources.fcc.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.fcc.requests.get", return_value=mock_resp):
         results = search_fcc("anything")
 
     assert results == []
@@ -40,7 +40,7 @@ def test_search_fcc_empty_html_returns_empty():
     mock_resp.raise_for_status = MagicMock()
     mock_resp.text = "<html><body><p>No results found.</p></body></html>"
 
-    with patch("retrace.sources.fcc.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.fcc.requests.get", return_value=mock_resp):
         results = search_fcc("xyzzy unknown device 99999")
 
     assert results == []
@@ -49,7 +49,7 @@ def test_search_fcc_empty_html_returns_empty():
 def test_download_fcc_photos_network_error_returns_empty(tmp_path):
     """Network error fetching the FCC filing page returns empty list."""
     with patch(
-        "retrace.sources.fcc.requests.get",
+        "pcb2bom.sources.fcc.requests.get",
         side_effect=req.RequestException("connection timed out"),
     ):
         result = download_fcc_photos("TEST-001", tmp_path)
@@ -63,7 +63,7 @@ def test_download_fcc_photos_no_photo_links_returns_empty(tmp_path):
     mock_resp.raise_for_status = MagicMock()
     mock_resp.text = "<html><body><a href='/FCC-ID/X/user-manual'>User Manual</a></body></html>"
 
-    with patch("retrace.sources.fcc.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.fcc.requests.get", return_value=mock_resp):
         result = download_fcc_photos("TEST-001", tmp_path)
 
     assert result == []
@@ -80,9 +80,9 @@ def test_download_fcc_photos_image_download_failure_is_skipped(tmp_path):
     )
 
     with patch(
-        "retrace.sources.fcc.requests.get",
+        "pcb2bom.sources.fcc.requests.get",
         side_effect=[filing_resp, req.RequestException("download failed")],
-    ), patch("retrace.sources.fcc.time.sleep"):
+    ), patch("pcb2bom.sources.fcc.time.sleep"):
         result = download_fcc_photos("TEST-001", tmp_path)
 
     assert result == []
@@ -103,8 +103,8 @@ def test_download_fcc_photos_oserror_on_write_skips_file(tmp_path):
     img_resp.iter_content.return_value = [b"fakedata"]
 
     with patch(
-        "retrace.sources.fcc.requests.get", side_effect=[filing_resp, img_resp]
-    ), patch("retrace.sources.fcc.time.sleep"), patch.object(
+        "pcb2bom.sources.fcc.requests.get", side_effect=[filing_resp, img_resp]
+    ), patch("pcb2bom.sources.fcc.time.sleep"), patch.object(
         pathlib.Path, "open", side_effect=OSError("disk full")
     ):
         result = download_fcc_photos("TEST-001", tmp_path)
@@ -123,7 +123,7 @@ def test_search_ifixit_invalid_json_returns_empty():
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.side_effect = ValueError("Expecting value: line 1 column 1")
 
-    with patch("retrace.sources.ifixit.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.ifixit.requests.get", return_value=mock_resp):
         results = search_ifixit("any query")
 
     assert results == []
@@ -135,7 +135,7 @@ def test_search_ifixit_empty_results_list_returns_empty():
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {"results": []}
 
-    with patch("retrace.sources.ifixit.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.ifixit.requests.get", return_value=mock_resp):
         results = search_ifixit("totally obscure device xyz")
 
     assert results == []
@@ -152,7 +152,7 @@ def test_search_ifixit_non_guide_types_filtered_out():
         ]
     }
 
-    with patch("retrace.sources.ifixit.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.ifixit.requests.get", return_value=mock_resp):
         results = search_ifixit("something")
 
     assert results == []
@@ -161,7 +161,7 @@ def test_search_ifixit_non_guide_types_filtered_out():
 def test_download_guide_images_network_error_returns_empty(tmp_path):
     """Network error fetching guide JSON returns empty list."""
     with patch(
-        "retrace.sources.ifixit.requests.get",
+        "pcb2bom.sources.ifixit.requests.get",
         side_effect=req.RequestException("connection refused"),
     ):
         result = download_guide_images(12345, tmp_path)
@@ -175,7 +175,7 @@ def test_download_guide_images_invalid_json_returns_empty(tmp_path):
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.side_effect = ValueError("bad json")
 
-    with patch("retrace.sources.ifixit.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.ifixit.requests.get", return_value=mock_resp):
         result = download_guide_images(12345, tmp_path)
 
     assert result == []
@@ -187,7 +187,7 @@ def test_download_guide_images_no_steps_or_images_returns_empty(tmp_path):
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = {"steps": [], "image": None}
 
-    with patch("retrace.sources.ifixit.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.ifixit.requests.get", return_value=mock_resp):
         result = download_guide_images(12345, tmp_path)
 
     assert result == []

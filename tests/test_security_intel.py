@@ -5,13 +5,13 @@ from __future__ import annotations
 import csv
 import io
 
-import retrace.identification.matcher as matcher_mod
-from retrace.core.pipeline import AnalysisResult, Component
-from retrace.export.bom import _component_to_bom_row, bom_to_csv, generate_bom
-from retrace.export.html_report import generate_html_report
-from retrace.export.pinout_diagram import _IC_PINOUTS, generate_ic_pinout_svg
-from retrace.export.svg import generate_svg
-from retrace.identification.matcher import lookup_security_intel
+import pcb2bom.identification.matcher as matcher_mod
+from pcb2bom.core.pipeline import AnalysisResult, Component
+from pcb2bom.export.bom import _component_to_bom_row, bom_to_csv, generate_bom
+from pcb2bom.export.html_report import generate_html_report
+from pcb2bom.export.pinout_diagram import _IC_PINOUTS, generate_ic_pinout_svg
+from pcb2bom.export.svg import generate_svg
+from pcb2bom.identification.matcher import lookup_security_intel
 
 # ---------------------------------------------------------------------------
 # Helpers

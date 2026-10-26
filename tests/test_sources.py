@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from retrace.sources.fcc import (
+from pcb2bom.sources.fcc import (
     _ext_from_content_type,
     _ext_from_url,
     _SearchResultParser,
     search_fcc,
 )
-from retrace.sources.ifixit import search_ifixit
+from pcb2bom.sources.ifixit import search_ifixit
 
 # ---------------------------------------------------------------------------
 # FCC helper tests
@@ -73,7 +73,7 @@ def test_search_fcc_returns_results():
     mock_resp.raise_for_status = MagicMock()
     mock_resp.text = mock_html
 
-    with patch("retrace.sources.fcc.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.fcc.requests.get", return_value=mock_resp):
         results = search_fcc("test device")
 
     assert len(results) == 2
@@ -84,7 +84,7 @@ def test_search_fcc_returns_results():
 def test_search_fcc_returns_empty_on_network_error():
     import requests as req
 
-    with patch("retrace.sources.fcc.requests.get", side_effect=req.RequestException("timeout")):
+    with patch("pcb2bom.sources.fcc.requests.get", side_effect=req.RequestException("timeout")):
         results = search_fcc("anything")
 
     assert results == []
@@ -121,7 +121,7 @@ def test_search_ifixit_returns_guides():
     mock_resp.raise_for_status = MagicMock()
     mock_resp.json.return_value = mock_json
 
-    with patch("retrace.sources.ifixit.requests.get", return_value=mock_resp):
+    with patch("pcb2bom.sources.ifixit.requests.get", return_value=mock_resp):
         results = search_ifixit("Neptune Apex")
 
     assert len(results) == 1
@@ -132,7 +132,7 @@ def test_search_ifixit_returns_guides():
 def test_search_ifixit_returns_empty_on_network_error():
     import requests as req
 
-    with patch("retrace.sources.ifixit.requests.get", side_effect=req.RequestException("timeout")):
+    with patch("pcb2bom.sources.ifixit.requests.get", side_effect=req.RequestException("timeout")):
         results = search_ifixit("anything")
 
     assert results == []

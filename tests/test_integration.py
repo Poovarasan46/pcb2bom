@@ -20,21 +20,21 @@ import pytest
 # ---------------------------------------------------------------------------
 # Constraint solver (AC-3)
 # ---------------------------------------------------------------------------
-from retrace.analysis.constraint_solver import (
+from pcb2bom.analysis.constraint_solver import (
     NET_GROUND,
     NET_POWER,
     ComponentSpec,
     ConstraintSolver,
     Pin,
 )
-from retrace.analysis.constraint_solver import (
+from pcb2bom.analysis.constraint_solver import (
     Trace as SolverTrace,
 )
 
 # ---------------------------------------------------------------------------
 # Cross-board pattern recognition
 # ---------------------------------------------------------------------------
-from retrace.analysis.cross_board import (
+from pcb2bom.analysis.cross_board import (
     BoardComponent,
     BoardTrace,
     CrossBoardEngine,
@@ -43,10 +43,10 @@ from retrace.analysis.cross_board import (
 # ---------------------------------------------------------------------------
 # Bayesian probe advisor
 # ---------------------------------------------------------------------------
-from retrace.analysis.probe_advisor import (
+from pcb2bom.analysis.probe_advisor import (
     Component as AdvisorComponent,
 )
-from retrace.analysis.probe_advisor import (
+from pcb2bom.analysis.probe_advisor import (
     Measurement,
     ProbeAdvisor,
 )
@@ -54,23 +54,23 @@ from retrace.analysis.probe_advisor import (
 # ---------------------------------------------------------------------------
 # Core pipeline
 # ---------------------------------------------------------------------------
-from retrace.core.pipeline import AnalysisResult, Component, Pipeline, Trace
-from retrace.export.bom import generate_bom
+from pcb2bom.core.pipeline import AnalysisResult, Component, Pipeline, Trace
+from pcb2bom.export.bom import generate_bom
 
 # ---------------------------------------------------------------------------
 # SVG export
 # ---------------------------------------------------------------------------
-from retrace.export.svg import generate_svg
+from pcb2bom.export.svg import generate_svg
 
 # ---------------------------------------------------------------------------
 # Component identification + BOM
 # ---------------------------------------------------------------------------
-from retrace.identification.matcher import _COMPONENT_DB, identify_components, lookup_part
+from pcb2bom.identification.matcher import _COMPONENT_DB, identify_components, lookup_part
 
 # ---------------------------------------------------------------------------
 # Debug-interface detection plugin
 # ---------------------------------------------------------------------------
-from retrace.plugins.builtin.debug_interfaces import detect_debug_interfaces
+from pcb2bom.plugins.builtin.debug_interfaces import detect_debug_interfaces
 
 # ===========================================================================
 # Helpers shared across tests

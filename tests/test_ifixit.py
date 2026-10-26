@@ -1,4 +1,4 @@
-"""Tests for retrace.sources.ifixit — iFixit API client."""
+"""Tests for pcb2bom.sources.ifixit — iFixit API client."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import requests
 
-from retrace.sources.ifixit import (
+from pcb2bom.sources.ifixit import (
     _ext_from_url,
     download_guide_images,
     search_ifixit,
@@ -90,7 +90,7 @@ class TestSearchIfixit:
                 "subject": "",
             },
         ]
-        with patch("retrace.sources.ifixit.requests.get", return_value=_make_search_response(hits)):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=_make_search_response(hits)):
             results = search_ifixit("Neptune Apex")
 
         assert len(results) == 1
@@ -109,18 +109,18 @@ class TestSearchIfixit:
                 "subject": "",
             }
         ]
-        with patch("retrace.sources.ifixit.requests.get", return_value=_make_search_response(hits)):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=_make_search_response(hits)):
             results = search_ifixit("Widget")
         assert len(results) == 1
         assert results[0]["type"] == "teardown"
 
     def test_empty_results(self):
-        with patch("retrace.sources.ifixit.requests.get", return_value=_make_search_response([])):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=_make_search_response([])):
             results = search_ifixit("nonexistent")
         assert results == []
 
     def test_network_error_returns_empty(self):
-        with patch("retrace.sources.ifixit.requests.get", side_effect=requests.RequestException("timeout")):
+        with patch("pcb2bom.sources.ifixit.requests.get", side_effect=requests.RequestException("timeout")):
             results = search_ifixit("anything")
         assert results == []
 
@@ -128,7 +128,7 @@ class TestSearchIfixit:
         resp = MagicMock()
         resp.raise_for_status = MagicMock()
         resp.json.side_effect = ValueError("bad json")
-        with patch("retrace.sources.ifixit.requests.get", return_value=resp):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=resp):
             results = search_ifixit("test")
         assert results == []
 
@@ -144,7 +144,7 @@ class TestSearchIfixit:
                 "subject": "My Device",
             }
         ]
-        with patch("retrace.sources.ifixit.requests.get", return_value=_make_search_response(hits)):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=_make_search_response(hits)):
             results = search_ifixit("My Device")
         r = results[0]
         for key in ("guideid", "title", "url", "image_url", "category", "subject", "type"):
@@ -167,8 +167,8 @@ class TestDownloadGuideImages:
         guide_resp = _make_guide_response(steps)
         img_resp = _make_image_response()
 
-        with patch("retrace.sources.ifixit.requests.get") as mock_get:
-            with patch("retrace.sources.ifixit.time.sleep"):
+        with patch("pcb2bom.sources.ifixit.requests.get") as mock_get:
+            with patch("pcb2bom.sources.ifixit.time.sleep"):
                 mock_get.side_effect = [guide_resp, img_resp]
                 paths = download_guide_images(125000, tmp_path)
 
@@ -179,8 +179,8 @@ class TestDownloadGuideImages:
         guide_resp = _make_guide_response(steps=[], primary_image="https://img.example.com/primary.jpg")
         img_resp = _make_image_response()
 
-        with patch("retrace.sources.ifixit.requests.get") as mock_get:
-            with patch("retrace.sources.ifixit.time.sleep"):
+        with patch("pcb2bom.sources.ifixit.requests.get") as mock_get:
+            with patch("pcb2bom.sources.ifixit.time.sleep"):
                 mock_get.side_effect = [guide_resp, img_resp]
                 paths = download_guide_images(9999, tmp_path)
 
@@ -188,12 +188,12 @@ class TestDownloadGuideImages:
 
     def test_returns_empty_when_no_images(self, tmp_path):
         guide_resp = _make_guide_response(steps=[])
-        with patch("retrace.sources.ifixit.requests.get", return_value=guide_resp):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=guide_resp):
             paths = download_guide_images(0, tmp_path)
         assert paths == []
 
     def test_network_error_returns_empty(self, tmp_path):
-        with patch("retrace.sources.ifixit.requests.get", side_effect=requests.RequestException("err")):
+        with patch("pcb2bom.sources.ifixit.requests.get", side_effect=requests.RequestException("err")):
             paths = download_guide_images(1, tmp_path)
         assert paths == []
 
@@ -201,14 +201,14 @@ class TestDownloadGuideImages:
         resp = MagicMock()
         resp.raise_for_status = MagicMock()
         resp.json.side_effect = ValueError("bad json")
-        with patch("retrace.sources.ifixit.requests.get", return_value=resp):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=resp):
             paths = download_guide_images(1, tmp_path)
         assert paths == []
 
     def test_creates_dest_dir(self, tmp_path):
         dest = tmp_path / "nested" / "ifixit"
         guide_resp = _make_guide_response(steps=[])
-        with patch("retrace.sources.ifixit.requests.get", return_value=guide_resp):
+        with patch("pcb2bom.sources.ifixit.requests.get", return_value=guide_resp):
             download_guide_images(1, dest)
         assert dest.exists()
 
@@ -229,8 +229,8 @@ class TestDownloadGuideImages:
         guide_resp = _make_guide_response(steps)
         img_resp = _make_image_response()
 
-        with patch("retrace.sources.ifixit.requests.get") as mock_get:
-            with patch("retrace.sources.ifixit.time.sleep"):
+        with patch("pcb2bom.sources.ifixit.requests.get") as mock_get:
+            with patch("pcb2bom.sources.ifixit.time.sleep"):
                 mock_get.side_effect = [guide_resp, img_resp]
                 paths = download_guide_images(42, tmp_path)
 
@@ -244,8 +244,8 @@ class TestDownloadGuideImages:
         bad_img = MagicMock()
         bad_img.raise_for_status.side_effect = requests.HTTPError("404")
 
-        with patch("retrace.sources.ifixit.requests.get") as mock_get:
-            with patch("retrace.sources.ifixit.time.sleep"):
+        with patch("pcb2bom.sources.ifixit.requests.get") as mock_get:
+            with patch("pcb2bom.sources.ifixit.time.sleep"):
                 mock_get.side_effect = [guide_resp, bad_img]
                 paths = download_guide_images(7, tmp_path)
 
@@ -260,8 +260,8 @@ class TestDownloadGuideImages:
         guide_resp = _make_guide_response(steps)
         img_resp = _make_image_response()
 
-        with patch("retrace.sources.ifixit.requests.get") as mock_get:
-            with patch("retrace.sources.ifixit.time.sleep"):
+        with patch("pcb2bom.sources.ifixit.requests.get") as mock_get:
+            with patch("pcb2bom.sources.ifixit.time.sleep"):
                 mock_get.side_effect = [guide_resp, img_resp]
                 # Patch Path.open to raise OSError on write
                 with patch("pathlib.Path.open", side_effect=OSError("disk full")):

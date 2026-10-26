@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from retrace.export.jtagulator import (
+from pcb2bom.export.jtagulator import (
     _extract_signal_pins,
     _get_pinout_for_finding,
     _jtag_signal_pins,
@@ -93,7 +93,7 @@ def _spi_finding(**overrides) -> dict:
 
 class TestJtagSignalPins:
     def test_20pin_jtag_has_all_signals(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["JTAG"][20]
         sig = _jtag_signal_pins(pins)
@@ -105,7 +105,7 @@ class TestJtagSignalPins:
         assert sig["TRST"] is not None
 
     def test_10pin_jtag_has_core_signals(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["JTAG"][10]
         sig = _jtag_signal_pins(pins)
@@ -122,7 +122,7 @@ class TestJtagSignalPins:
 
 class TestSwdSignalPins:
     def test_10pin_swd(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["SWD"][10]
         sig = _swd_signal_pins(pins)
@@ -132,7 +132,7 @@ class TestSwdSignalPins:
         assert sig["RESET"] is not None
 
     def test_4pin_swd(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["SWD"][4]
         sig = _swd_signal_pins(pins)
@@ -140,7 +140,7 @@ class TestSwdSignalPins:
         assert sig["SWDIO"] is not None
 
     def test_2pin_minimal(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["SWD"][2]
         sig = _swd_signal_pins(pins)
@@ -153,7 +153,7 @@ class TestSwdSignalPins:
 
 class TestUartSignalPins:
     def test_4pin_uart(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["UART"][4]
         sig = _uart_signal_pins(pins)
@@ -162,7 +162,7 @@ class TestUartSignalPins:
         assert sig["GND"] is not None
 
     def test_3pin_uart(self):
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
 
         pins = _PINOUTS["UART"][3]
         sig = _uart_signal_pins(pins)
@@ -479,7 +479,7 @@ class TestEdgeCases:
         We test this by building a pin list where nTRST appears but 'TRST' substring
         would not be matched first (i.e., result['TRST'] was already None at the start
         of that iteration because no earlier pin set it)."""
-        from retrace.export.jtagulator import _jtag_signal_pins
+        from pcb2bom.export.jtagulator import _jtag_signal_pins
 
         # Pin list: only nTRST — no prior TRST. The inner loop matches TRST in NTRST,
         # setting result["TRST"] = 1 on line 118. Then line 121 checks
@@ -487,7 +487,7 @@ class TestEdgeCases:
         # To reach line 122, we need NTRST but where 'TRST' is NOT a substring —
         # that's linguistically impossible, so instead we verify the nTRST behavior
         # works correctly via the 20-pin pinout which contains 'nTRST'.
-        from retrace.export.pinout_diagram import _PINOUTS
+        from pcb2bom.export.pinout_diagram import _PINOUTS
         pins = _PINOUTS["JTAG"][20]
         sig = _jtag_signal_pins(pins)
         # nTRST should result in TRST being set (via line 118 or 122)

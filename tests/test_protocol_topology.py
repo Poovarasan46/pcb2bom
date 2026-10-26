@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from retrace.analysis.protocol_topology import (
+from pcb2bom.analysis.protocol_topology import (
     BusTopology,
     _parse_ohms,
     _proximity_threshold,
     format_topology,
     infer_topology,
 )
-from retrace.core.pipeline import AnalysisResult, Component
+from pcb2bom.core.pipeline import AnalysisResult, Component
 
 # ---------------------------------------------------------------------------
 # Component / board factory helpers

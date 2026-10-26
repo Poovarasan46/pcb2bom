@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from retrace.analysis.firmware_triage import (
+from pcb2bom.analysis.firmware_triage import (
     _classify_entropy,
     _shannon_entropy,
     compute_entropy_map,
@@ -325,7 +325,7 @@ class TestFormatReport:
 
     def test_find_magic_more_than_500_cap(self):
         """Line 156 — break when matches > 500."""
-        import retrace.analysis.firmware_triage as ft
+        import pcb2bom.analysis.firmware_triage as ft
         # Inject a fake signature that matches every byte so we get > 500 matches
         original_sigs = ft._MAGIC_SIGNATURES
         # Single-byte pattern (b"\x00") repeated many times

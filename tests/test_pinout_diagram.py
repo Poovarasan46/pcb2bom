@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace
-from retrace.export.pinout_diagram import (
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
+from pcb2bom.export.pinout_diagram import (
     _GROUP_COLORS,
     _PINOUTS,
     _PROBE_GUIDES,

@@ -7,8 +7,8 @@ import io
 import json
 import re
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace
-from retrace.export.bom import (
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
+from pcb2bom.export.bom import (
     _esc,
     bom_to_csv,
     bom_to_json,
@@ -485,7 +485,7 @@ class TestBomToSvgValidity:
         assert "Bill of Materials" in bom_to_svg(bom)
 
     def test_version_in_footer(self):
-        from retrace import __version__
+        from pcb2bom import __version__
         bom = generate_bom(_make_result())
         svg = bom_to_svg(bom)
         assert __version__ in svg
@@ -1088,7 +1088,7 @@ class TestSecurityIntelInBom:
         comp = _make_component("U1", part_number="STM32F103", marking="STM32F103")
         result = _make_result(components=[comp])
         # Patch the matcher module's lookup_security_intel so the inline import raises
-        with patch("retrace.identification.matcher.lookup_security_intel",
+        with patch("pcb2bom.identification.matcher.lookup_security_intel",
                    side_effect=RuntimeError("lookup failed")):
             bom = generate_bom(result)
             # Must not crash — exception is swallowed inside _component_to_bom_row

@@ -1,6 +1,6 @@
 """Tests for the device registry — model/revision lookup for hardware RE targets."""
 
-from retrace.sources.device_registry import (
+from pcb2bom.sources.device_registry import (
     DEVICE_FAMILIES,
     format_search_results,
     get_family,

@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import os
 
-from retrace.analysis.firmware_triage import (
+from pcb2bom.analysis.firmware_triage import (
     EntropyBlock,
     MagicMatch,
     TriageResult,
     triage_firmware,
 )
-from retrace.export.entropy_svg import generate_entropy_svg
+from pcb2bom.export.entropy_svg import generate_entropy_svg
 
 
 def _make_result(**overrides) -> TriageResult:

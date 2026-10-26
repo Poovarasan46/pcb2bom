@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from retrace.cli import main
+from pcb2bom.cli import main
 
 
 @pytest.fixture()
@@ -98,13 +98,13 @@ def test_search_command_basic(runner):
     """search should print results from both sources without hitting the network.
 
     The CLI imports search_fcc/search_ifixit inside the function body, so we
-    patch at the source modules rather than at retrace.cli.
+    patch at the source modules rather than at pcb2bom.cli.
     """
     fcc_results = [{"fcc_id": "2ABCD-TEST1", "description": "Test widget"}]
     ifixit_results = [{"guideid": 99, "title": "Fix the board"}]
 
-    with patch("retrace.sources.fcc.search_fcc", return_value=fcc_results), \
-         patch("retrace.sources.ifixit.search_ifixit", return_value=ifixit_results):
+    with patch("pcb2bom.sources.fcc.search_fcc", return_value=fcc_results), \
+         patch("pcb2bom.sources.ifixit.search_ifixit", return_value=ifixit_results):
         result = runner.invoke(main, ["search", "test board"])
 
     assert result.exit_code == 0
@@ -114,8 +114,8 @@ def test_search_command_basic(runner):
 
 
 def test_search_empty_results(runner):
-    with patch("retrace.sources.fcc.search_fcc", return_value=[]), \
-         patch("retrace.sources.ifixit.search_ifixit", return_value=[]):
+    with patch("pcb2bom.sources.fcc.search_fcc", return_value=[]), \
+         patch("pcb2bom.sources.ifixit.search_ifixit", return_value=[]):
         result = runner.invoke(main, ["search", "nothing here"])
 
     assert result.exit_code == 0
@@ -126,8 +126,8 @@ def test_search_limit_option(runner):
     fcc_results = [{"fcc_id": f"FCC{i}", "description": ""} for i in range(10)]
     ifixit_results = [{"guideid": i, "title": f"Guide {i}"} for i in range(10)]
 
-    with patch("retrace.sources.fcc.search_fcc", return_value=fcc_results), \
-         patch("retrace.sources.ifixit.search_ifixit", return_value=ifixit_results):
+    with patch("pcb2bom.sources.fcc.search_fcc", return_value=fcc_results), \
+         patch("pcb2bom.sources.ifixit.search_ifixit", return_value=ifixit_results):
         result = runner.invoke(main, ["search", "widget", "--limit", "2"])
 
     assert result.exit_code == 0
@@ -144,9 +144,9 @@ def test_search_with_download(runner, tmp_path):
     fcc_results = [{"fcc_id": "XYZ-1"}]
     ifixit_results = [{"guideid": 42, "title": "Teardown"}]
 
-    with patch("retrace.sources.fcc.search_fcc", return_value=fcc_results), \
-         patch("retrace.sources.ifixit.search_ifixit", return_value=ifixit_results), \
-         patch("retrace.sources.board_sourcer.download_all", return_value=3) as mock_dl:
+    with patch("pcb2bom.sources.fcc.search_fcc", return_value=fcc_results), \
+         patch("pcb2bom.sources.ifixit.search_ifixit", return_value=ifixit_results), \
+         patch("pcb2bom.sources.board_sourcer.download_all", return_value=3) as mock_dl:
         result = runner.invoke(main, ["search", "camera", "--download"])
 
     assert result.exit_code == 0
@@ -197,7 +197,7 @@ def test_identify_found(runner):
         "category": "mcu",
         "datasheet": "https://example.com/ds.pdf",
     }
-    with patch("retrace.identification.matcher.lookup_part", return_value=match):
+    with patch("pcb2bom.identification.matcher.lookup_part", return_value=match):
         result = runner.invoke(main, ["identify", "STM32F030"])
     assert result.exit_code == 0
     assert "STM32F030C8T6" in result.output
@@ -205,14 +205,14 @@ def test_identify_found(runner):
 
 
 def test_identify_not_found(runner):
-    with patch("retrace.identification.matcher.lookup_part", return_value=None):
+    with patch("pcb2bom.identification.matcher.lookup_part", return_value=None):
         result = runner.invoke(main, ["identify", "XYZNOPART"])
     assert result.exit_code != 0
 
 
 def test_identify_json_output(runner):
     match = {"part": "LM7805", "manufacturer": "TI", "description": "5V regulator"}
-    with patch("retrace.identification.matcher.lookup_part", return_value=match):
+    with patch("pcb2bom.identification.matcher.lookup_part", return_value=match):
         result = runner.invoke(main, ["identify", "LM7805", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -226,8 +226,8 @@ def test_identify_json_output(runner):
 def test_search_json_output(runner):
     fcc_results = [{"fcc_id": "ABC-123", "description": "Widget"}]
     ifixit_results = [{"guideid": 1, "title": "Teardown"}]
-    with patch("retrace.sources.fcc.search_fcc", return_value=fcc_results), \
-         patch("retrace.sources.ifixit.search_ifixit", return_value=ifixit_results):
+    with patch("pcb2bom.sources.fcc.search_fcc", return_value=fcc_results), \
+         patch("pcb2bom.sources.ifixit.search_ifixit", return_value=ifixit_results):
         result = runner.invoke(main, ["search", "test", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -240,7 +240,7 @@ def test_search_json_output(runner):
 # ---------------------------------------------------------------------------
 
 def test_report_json_output(runner):
-    with patch("retrace.learning.engine.generate_report", return_value="report text"):
+    with patch("pcb2bom.learning.engine.generate_report", return_value="report text"):
         result = runner.invoke(main, ["report", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -285,7 +285,7 @@ def test_trace_command(runner, tmp_path):
         "junction_count": 3,
         "save": save_mock,
     }
-    with patch("retrace.detection.trace_extractor.extract_traces", return_value=trace_result):
+    with patch("pcb2bom.detection.trace_extractor.extract_traces", return_value=trace_result):
         result = runner.invoke(main, ["trace", str(img)])
     assert result.exit_code == 0
     assert "12 traces" in result.output
@@ -298,7 +298,7 @@ def test_trace_command(runner, tmp_path):
 
 def _make_analysis_result(image_path="board.png", components=None, traces=None):
     """Helper to build a minimal AnalysisResult for CLI tests."""
-    from retrace.core.pipeline import AnalysisResult, Component, Trace
+    from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
     return AnalysisResult(
         image_path=image_path,
         components=components or [
@@ -320,7 +320,7 @@ def test_advise_command(runner, tmp_path):
         {"location": (100, 200), "reason": "High entropy node", "entropy_reduction": 1.5},
         {"location": (300, 400), "reason": "Unresolved net", "entropy_reduction": 0.8},
     ]
-    with patch("retrace.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
+    with patch("pcb2bom.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
         result = runner.invoke(main, ["advise", str(img)])
     assert result.exit_code == 0
     assert "probe" in result.output.lower() or "information gain" in result.output.lower()
@@ -332,7 +332,7 @@ def test_advise_json(runner, tmp_path):
     recs = [
         {"location": (100, 200), "reason": "High entropy node", "entropy_reduction": 1.5},
     ]
-    with patch("retrace.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
+    with patch("pcb2bom.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
         result = runner.invoke(main, ["advise", str(img), "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -369,8 +369,8 @@ def test_debug_command(runner, tmp_path):
             },
         ],
     }
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
                return_value=debug_output):
         result = runner.invoke(main, ["debug", str(img)])
     assert result.exit_code == 0
@@ -388,8 +388,8 @@ def test_debug_json(runner, tmp_path):
         "summary": "No debug interfaces",
         "findings": [],
     }
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
                return_value=debug_output):
         result = runner.invoke(main, ["debug", str(img), "--json"])
     assert result.exit_code == 0
@@ -405,8 +405,8 @@ def test_debug_no_findings(runner, tmp_path):
         "summary": "No debug interfaces detected",
         "findings": [],
     }
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
                return_value=debug_output):
         result = runner.invoke(main, ["debug", str(img)])
     assert result.exit_code == 0
@@ -418,7 +418,7 @@ def test_debug_no_findings(runner, tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_learn_command(runner):
-    with patch("retrace.identification.matcher.learn_component") as mock_learn:
+    with patch("pcb2bom.identification.matcher.learn_component") as mock_learn:
         result = runner.invoke(main, [
             "learn", "ATmega328P",
             "--manufacturer", "Microchip",
@@ -438,14 +438,14 @@ def test_learn_command(runner):
 
 
 def test_learn_minimal(runner):
-    with patch("retrace.identification.matcher.learn_component"):
+    with patch("pcb2bom.identification.matcher.learn_component"):
         result = runner.invoke(main, ["learn", "LM317"])
     assert result.exit_code == 0
     assert "Learned: LM317" in result.output
 
 
 def test_learn_error(runner):
-    with patch("retrace.identification.matcher.learn_component", side_effect=ValueError("duplicate")):
+    with patch("pcb2bom.identification.matcher.learn_component", side_effect=ValueError("duplicate")):
         result = runner.invoke(main, ["learn", "BAD_PART"])
     assert result.exit_code != 0
 
@@ -459,7 +459,7 @@ def test_cross_board_command(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.cross_board import BoardAnalysis, PatternMatch
+    from pcb2bom.analysis.cross_board import BoardAnalysis, PatternMatch
     analysis = BoardAnalysis(
         matches=[
             PatternMatch(
@@ -474,8 +474,8 @@ def test_cross_board_command(runner, tmp_path):
         coverage=0.67,
     )
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.cross_board.CrossBoardEngine.analyse", return_value=analysis):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.cross_board.CrossBoardEngine.analyse", return_value=analysis):
         result = runner.invoke(main, ["cross-board", str(img)])
     assert result.exit_code == 0
     assert "voltage_regulator" in result.output
@@ -488,7 +488,7 @@ def test_cross_board_json(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.cross_board import BoardAnalysis, PatternMatch
+    from pcb2bom.analysis.cross_board import BoardAnalysis, PatternMatch
     analysis = BoardAnalysis(
         matches=[
             PatternMatch(
@@ -503,8 +503,8 @@ def test_cross_board_json(runner, tmp_path):
         coverage=0.50,
     )
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.cross_board.CrossBoardEngine.analyse", return_value=analysis):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.cross_board.CrossBoardEngine.analyse", return_value=analysis):
         result = runner.invoke(main, ["cross-board", str(img), "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -518,11 +518,11 @@ def test_cross_board_no_matches(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.cross_board import BoardAnalysis
+    from pcb2bom.analysis.cross_board import BoardAnalysis
     analysis = BoardAnalysis(matches=[], novel_components=["U1", "R1"], coverage=0.0)
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.cross_board.CrossBoardEngine.analyse", return_value=analysis):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.cross_board.CrossBoardEngine.analyse", return_value=analysis):
         result = runner.invoke(main, ["cross-board", str(img)])
     assert result.exit_code == 0
     assert "No known subcircuit patterns" in result.output
@@ -538,7 +538,7 @@ def test_export_command(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_dir = tmp_path / "export_out"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["export", str(img), "-o", str(out_dir)])
     assert result.exit_code == 0
     assert "Exported" in result.output
@@ -551,7 +551,7 @@ def test_export_csv_format(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_dir = tmp_path / "csv_out"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["export", str(img), "--format", "csv", "-o", str(out_dir)])
     assert result.exit_code == 0
     assert "[csv]" in result.output
@@ -568,14 +568,14 @@ def test_compare_identical_boards(runner, tmp_path):
     img_b.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result()
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["compare", str(img_a), str(img_b)])
     assert result.exit_code == 0
     assert "No differences" in result.output
 
 
 def test_compare_different_boards(runner, tmp_path):
-    from retrace.core.pipeline import AnalysisResult, Component
+    from pcb2bom.core.pipeline import AnalysisResult, Component
     img_a = tmp_path / "board_v1.png"
     img_b = tmp_path / "board_v2.png"
     img_a.write_bytes(b"\x89PNG\r\n\x1a\n")
@@ -598,7 +598,7 @@ def test_compare_different_boards(runner, tmp_path):
         traces=[],
     )
 
-    with patch("retrace.core.pipeline.Pipeline.run", side_effect=[result_a, result_b]):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", side_effect=[result_a, result_b]):
         result = runner.invoke(main, ["compare", str(img_a), str(img_b)])
     assert result.exit_code == 0
     assert "Added" in result.output
@@ -617,7 +617,7 @@ def test_compare_json(runner, tmp_path):
     img_b.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result()
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["compare", str(img_a), str(img_b), "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -642,8 +642,8 @@ def test_report_html_command(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_file = tmp_path / "report.html"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.html_report.save_html_report") as mock_save:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.html_report.save_html_report") as mock_save:
         result = runner.invoke(main, ["report-html", str(img), "-o", str(out_file)])
     assert result.exit_code == 0
     assert "Report saved" in result.output
@@ -655,8 +655,8 @@ def test_report_html_default_output(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.html_report.save_html_report"):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.html_report.save_html_report"):
         result = runner.invoke(main, ["report-html", str(img)])
     assert result.exit_code == 0
     assert "board_report.html" in result.output
@@ -667,7 +667,7 @@ def test_report_html_default_output(runner, tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_report_plain(runner):
-    with patch("retrace.learning.engine.generate_report", return_value="Knowledge base: 42 entries"):
+    with patch("pcb2bom.learning.engine.generate_report", return_value="Knowledge base: 42 entries"):
         result = runner.invoke(main, ["report"])
     assert result.exit_code == 0
     assert "42 entries" in result.output
@@ -682,7 +682,7 @@ def test_scan_success(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["scan", str(img)])
     assert result.exit_code == 0
     assert "components" in result.output.lower() or "U1" in result.output
@@ -694,7 +694,7 @@ def test_scan_with_output_dir(runner, tmp_path):
     out_dir = tmp_path / "scan_out"
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["scan", str(img), "-o", str(out_dir)])
     assert result.exit_code == 0
     assert "saved" in result.output.lower()
@@ -706,8 +706,8 @@ def test_scan_with_bom(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     bom_data = {"components": [{"ref": "U1"}, {"ref": "R1"}]}
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.bom.generate_bom", return_value=bom_data):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.bom.generate_bom", return_value=bom_data):
         result = runner.invoke(main, ["scan", str(img), "--bom"])
     assert result.exit_code == 0
     assert "2 components" in result.output
@@ -719,7 +719,7 @@ def test_scan_quiet(runner, tmp_path):
     out_dir = tmp_path / "quiet_out"
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["--quiet", "scan", str(img), "-o", str(out_dir)])
     assert result.exit_code == 0
     assert "saved" not in result.output.lower()
@@ -741,8 +741,8 @@ def test_export_kicad_command(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_file = tmp_path / "board.net"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.kicad.save_kicad_netlist") as mock_save:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.kicad.save_kicad_netlist") as mock_save:
         result = runner.invoke(main, ["export-kicad", str(img), "-o", str(out_file)])
     assert result.exit_code == 0
     assert "KiCad netlist saved" in result.output
@@ -754,8 +754,8 @@ def test_export_kicad_default_output(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.kicad.save_kicad_netlist"):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.kicad.save_kicad_netlist"):
         result = runner.invoke(main, ["export-kicad", str(img)])
     assert result.exit_code == 0
     assert "board.net" in result.output
@@ -780,7 +780,7 @@ def test_batch_command(runner, tmp_path):
 
     mock_result = _make_analysis_result("board.png")
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["batch", str(src), "-o", str(out)])
     assert result.exit_code == 0
     assert "Batch complete" in result.output
@@ -802,8 +802,8 @@ def test_batch_with_report(runner, tmp_path):
 
     mock_result = _make_analysis_result("board.png")
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.html_report.save_html_report") as mock_report:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.html_report.save_html_report") as mock_report:
         result = runner.invoke(main, ["batch", str(src), "-o", str(out), "--report"])
     assert result.exit_code == 0
     mock_report.assert_called_once()
@@ -817,15 +817,15 @@ def test_batch_with_kicad(runner, tmp_path):
 
     mock_result = _make_analysis_result("board.png")
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.kicad.save_kicad_netlist") as mock_kicad:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.kicad.save_kicad_netlist") as mock_kicad:
         result = runner.invoke(main, ["batch", str(src), "-o", str(out), "--kicad"])
     assert result.exit_code == 0
     mock_kicad.assert_called_once()
 
 
 def test_batch_with_pinout(runner, tmp_path):
-    from retrace.core.pipeline import Component
+    from pcb2bom.core.pipeline import Component
     src = tmp_path / "boards"
     src.mkdir()
     (src / "board.png").write_bytes(b"\x89PNG\r\n\x1a\n")
@@ -837,8 +837,8 @@ def test_batch_with_pinout(runner, tmp_path):
     ]
     mock_result = _make_analysis_result("board.png", components=comps)
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.pinout_diagram.save_pinout_svg") as mock_pinout:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.pinout_diagram.save_pinout_svg") as mock_pinout:
         result = runner.invoke(main, ["batch", str(src), "-o", str(out), "--pinout"])
     assert result.exit_code == 0
     mock_pinout.assert_called_once()
@@ -855,7 +855,7 @@ def test_pinout_help(runner):
 
 
 def test_pinout_command(runner, tmp_path):
-    from retrace.core.pipeline import Component
+    from pcb2bom.core.pipeline import Component
     img = tmp_path / "board.png"
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     out = tmp_path / "pinouts"
@@ -873,10 +873,10 @@ def test_pinout_command(runner, tmp_path):
          "cvss_vector": "", "mitre_attack": ["T1200"]},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings), \
-         patch("retrace.export.pinout_diagram.save_pinout_svg") as mock_save:
+         patch("pcb2bom.export.pinout_diagram.save_pinout_svg") as mock_save:
         result = runner.invoke(main, ["pinout", str(img), "-o", str(out)])
     assert result.exit_code == 0
     assert "pinout" in result.output.lower()
@@ -889,8 +889,8 @@ def test_pinout_no_findings(runner, tmp_path):
 
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=[]):
         result = runner.invoke(main, ["pinout", str(img)])
     assert result.exit_code == 0
@@ -910,8 +910,8 @@ def test_pinout_json(runner, tmp_path):
          "cvss_vector": "", "mitre_attack": ["T1200"]},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings):
         result = runner.invoke(main, ["pinout", str(img), "--json"])
     assert result.exit_code == 0
@@ -937,10 +937,10 @@ def test_pinout_filter_interface(runner, tmp_path):
          "cvss_vector": "", "mitre_attack": ["T1200"]},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings), \
-         patch("retrace.export.pinout_diagram.save_pinout_svg") as mock_save:
+         patch("pcb2bom.export.pinout_diagram.save_pinout_svg") as mock_save:
         result = runner.invoke(main, ["pinout", str(img), "--interface", "UART"])
     assert result.exit_code == 0
     assert mock_save.call_count == 1
@@ -968,8 +968,8 @@ def test_debug_output_file(runner, tmp_path):
             },
         ],
     }
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
                return_value=debug_output):
         result = runner.invoke(main, ["debug", str(img), "--output", str(out_file)])
     assert result.exit_code == 0
@@ -985,8 +985,8 @@ def test_debug_output_file_json(runner, tmp_path):
     out_file = tmp_path / "debug.txt"
     mock_result = _make_analysis_result(str(img))
     debug_output = {"summary": "No debug interfaces", "findings": []}
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
                return_value=debug_output):
         result = runner.invoke(main, ["debug", str(img), "--json", "--output", str(out_file)])
     assert result.exit_code == 0
@@ -1001,8 +1001,8 @@ def test_debug_no_output_flag_no_file(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
     debug_output = {"summary": "No debug interfaces", "findings": []}
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.DebugInterfaceAnalyzer.analyze",
                return_value=debug_output):
         result = runner.invoke(main, ["debug", str(img)])
     assert result.exit_code == 0
@@ -1021,7 +1021,7 @@ def test_advise_output_file(runner, tmp_path):
         {"location": (100, 200), "reason": "High entropy node", "entropy_reduction": 1.5},
         {"location": (300, 400), "reason": "Unresolved net", "entropy_reduction": 0.8},
     ]
-    with patch("retrace.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
+    with patch("pcb2bom.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
         result = runner.invoke(main, ["advise", str(img), "--output", str(out_file)])
     assert result.exit_code == 0
     assert out_file.exists()
@@ -1035,7 +1035,7 @@ def test_advise_output_file_json(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     out_file = tmp_path / "probe.txt"
     recs = [{"location": (10, 20), "reason": "Test", "entropy_reduction": 0.5}]
-    with patch("retrace.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
+    with patch("pcb2bom.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
         result = runner.invoke(main, ["advise", str(img), "--json", "--output", str(out_file)])
     assert result.exit_code == 0
     assert out_file.exists()
@@ -1049,7 +1049,7 @@ def test_advise_no_output_flag_no_file(runner, tmp_path):
     img = tmp_path / "board.png"
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     recs = [{"location": (100, 200), "reason": "Test", "entropy_reduction": 1.0}]
-    with patch("retrace.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
+    with patch("pcb2bom.analysis.probe_advisor.ProbeAdvisor.recommend", return_value=recs):
         result = runner.invoke(main, ["advise", str(img)])
     assert result.exit_code == 0
     assert not any(tmp_path.glob("*.txt"))
@@ -1075,7 +1075,7 @@ def test_solve_command(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.constraint_solver import SolverResult
+    from pcb2bom.analysis.constraint_solver import SolverResult
     solver_result = SolverResult(
         net_assignment={"U1.OUT": "SIGNAL", "R1.A": "SIGNAL"},
         inferred_traces=[("U1.OUT", "R1.A")],
@@ -1084,8 +1084,8 @@ def test_solve_command(runner, tmp_path):
         iterations=3,
     )
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.constraint_solver.ConstraintSolver.solve",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.constraint_solver.ConstraintSolver.solve",
                return_value=solver_result):
         result = runner.invoke(main, ["solve", str(img)])
     assert result.exit_code == 0
@@ -1101,7 +1101,7 @@ def test_solve_output_file(runner, tmp_path):
     out_file = tmp_path / "solve_results.txt"
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.constraint_solver import SolverResult
+    from pcb2bom.analysis.constraint_solver import SolverResult
     solver_result = SolverResult(
         net_assignment={"U1.VCC": "POWER", "U1.GND": "GROUND"},
         inferred_traces=[],
@@ -1110,8 +1110,8 @@ def test_solve_output_file(runner, tmp_path):
         iterations=5,
     )
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.constraint_solver.ConstraintSolver.solve",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.constraint_solver.ConstraintSolver.solve",
                return_value=solver_result):
         result = runner.invoke(main, ["solve", str(img), "--output", str(out_file)])
     assert result.exit_code == 0
@@ -1128,7 +1128,7 @@ def test_solve_with_conflicts(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.constraint_solver import SolverResult
+    from pcb2bom.analysis.constraint_solver import SolverResult
     solver_result = SolverResult(
         net_assignment={"U1.OUT": "UNKNOWN"},
         inferred_traces=[],
@@ -1137,8 +1137,8 @@ def test_solve_with_conflicts(runner, tmp_path):
         iterations=10,
     )
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.constraint_solver.ConstraintSolver.solve",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.constraint_solver.ConstraintSolver.solve",
                return_value=solver_result):
         result = runner.invoke(main, ["solve", str(img)])
     assert result.exit_code == 0
@@ -1166,7 +1166,7 @@ def test_attack_paths_command(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.attack_path import AttackEdge, AttackPath
+    from pcb2bom.analysis.attack_path import AttackEdge, AttackPath
 
     paths = [
         AttackPath(
@@ -1181,9 +1181,9 @@ def test_attack_paths_command(runner, tmp_path):
         ),
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.attack_path.rank_attack_paths", return_value=paths), \
-         patch("retrace.analysis.attack_path.format_attack_paths", return_value="JTAG -> MCU [0.85]"):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.attack_path.rank_attack_paths", return_value=paths), \
+         patch("pcb2bom.analysis.attack_path.format_attack_paths", return_value="JTAG -> MCU [0.85]"):
         result = runner.invoke(main, ["attack-paths", str(img)])
     assert result.exit_code == 0
     assert "JTAG" in result.output
@@ -1194,7 +1194,7 @@ def test_attack_paths_json(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    from retrace.analysis.attack_path import AttackEdge, AttackPath
+    from pcb2bom.analysis.attack_path import AttackEdge, AttackPath
 
     paths = [
         AttackPath(
@@ -1209,8 +1209,8 @@ def test_attack_paths_json(runner, tmp_path):
         ),
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.attack_path.rank_attack_paths", return_value=paths):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.attack_path.rank_attack_paths", return_value=paths):
         result = runner.invoke(main, ["attack-paths", str(img), "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -1226,9 +1226,9 @@ def test_attack_paths_empty(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.attack_path.rank_attack_paths", return_value=[]), \
-         patch("retrace.analysis.attack_path.format_attack_paths", return_value="No attack paths found."):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.attack_path.rank_attack_paths", return_value=[]), \
+         patch("pcb2bom.analysis.attack_path.format_attack_paths", return_value="No attack paths found."):
         result = runner.invoke(main, ["attack-paths", str(img)])
     assert result.exit_code == 0
 
@@ -1238,9 +1238,9 @@ def test_attack_paths_top_k(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.analysis.attack_path.rank_attack_paths", return_value=[]) as mock_rank, \
-         patch("retrace.analysis.attack_path.format_attack_paths", return_value=""):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.analysis.attack_path.rank_attack_paths", return_value=[]) as mock_rank, \
+         patch("pcb2bom.analysis.attack_path.format_attack_paths", return_value=""):
         runner.invoke(main, ["attack-paths", str(img), "--top", "3"])
     mock_rank.assert_called_once()
     _, kwargs = mock_rank.call_args
@@ -1268,8 +1268,8 @@ def test_export_kicad_pcb_command(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_file = tmp_path / "board.kicad_pcb"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.kicad.save_kicad_pcb") as mock_save:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.kicad.save_kicad_pcb") as mock_save:
         result = runner.invoke(main, ["export-kicad-pcb", str(img), "-o", str(out_file)])
     assert result.exit_code == 0
     assert "KiCad PCB saved" in result.output
@@ -1281,8 +1281,8 @@ def test_export_kicad_pcb_default_output(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.kicad.save_kicad_pcb"):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.kicad.save_kicad_pcb"):
         result = runner.invoke(main, ["export-kicad-pcb", str(img)])
     assert result.exit_code == 0
     assert "board.kicad_pcb" in result.output
@@ -1294,8 +1294,8 @@ def test_export_kicad_pcb_with_title_and_scale(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_file = tmp_path / "custom.kicad_pcb"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.kicad.save_kicad_pcb") as mock_save:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.kicad.save_kicad_pcb") as mock_save:
         result = runner.invoke(main, [
             "export-kicad-pcb", str(img),
             "-o", str(out_file),
@@ -1332,8 +1332,8 @@ def test_jtagulator_json(runner, tmp_path):
          "component_marking": "JTAG20"},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings):
         result = runner.invoke(main, ["jtagulator", str(img), "--json"])
     assert result.exit_code == 0
@@ -1348,10 +1348,10 @@ def test_jtagulator_no_findings(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=[]), \
-         patch("retrace.export.jtagulator.export_jtagulator_configs", return_value={}):
+         patch("pcb2bom.export.jtagulator.export_jtagulator_configs", return_value={}):
         result = runner.invoke(main, ["jtagulator", str(img)])
     assert result.exit_code == 0
     assert "No debug interfaces" in result.output
@@ -1372,10 +1372,10 @@ def test_jtagulator_with_configs(runner, tmp_path):
     }
     out_dir = tmp_path / "jtagulator_out"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings), \
-         patch("retrace.export.jtagulator.export_jtagulator_configs", return_value=configs):
+         patch("pcb2bom.export.jtagulator.export_jtagulator_configs", return_value=configs):
         result = runner.invoke(main, ["jtagulator", str(img), "-o", str(out_dir)])
     assert result.exit_code == 0
     assert "2 config file(s)" in result.output or "config" in result.output.lower()
@@ -1392,10 +1392,10 @@ def test_jtagulator_with_board_name_and_voltage(runner, tmp_path):
                  "component_marking": "SWD"}]
     configs = {"swd_scan.cfg": "# SWD config\nVTREF 1.8\n"}
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings), \
-         patch("retrace.export.jtagulator.export_jtagulator_configs",
+         patch("pcb2bom.export.jtagulator.export_jtagulator_configs",
                return_value=configs) as mock_export:
         result = runner.invoke(main, [
             "jtagulator", str(img),
@@ -1413,8 +1413,8 @@ def test_jtagulator_json_with_board_name(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=[]):
         result = runner.invoke(main, ["jtagulator", str(img), "--json", "--board-name", "MyBoard"])
     assert result.exit_code == 0
@@ -1434,8 +1434,8 @@ def test_compare_svg_output(runner, tmp_path):
     svg_out = tmp_path / "diff.svg"
     mock_result = _make_analysis_result()
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.svg.generate_diff_svg", return_value="<svg/>") as mock_svg:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.svg.generate_diff_svg", return_value="<svg/>") as mock_svg:
         result = runner.invoke(main, ["compare", str(img_a), str(img_b), "--svg", str(svg_out)])
     assert result.exit_code == 0
     assert svg_out.exists()
@@ -1452,8 +1452,8 @@ def test_compare_svg_output_no_changes(runner, tmp_path):
     svg_out = tmp_path / "diff.svg"
     mock_result = _make_analysis_result()
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.svg.generate_diff_svg", return_value=None):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.svg.generate_diff_svg", return_value=None):
         result = runner.invoke(main, ["compare", str(img_a), str(img_b), "--svg", str(svg_out)])
     assert result.exit_code == 0
     assert "No changes to visualize" in result.output
@@ -1470,8 +1470,8 @@ def test_report_html_with_title(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     out_file = tmp_path / "titled.html"
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.html_report.save_html_report") as mock_save:
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.html_report.save_html_report") as mock_save:
         result = runner.invoke(main, [
             "report-html", str(img), "-o", str(out_file), "--title", "My Custom Board"
         ])
@@ -1490,8 +1490,8 @@ def test_scan_bom_quiet(runner, tmp_path):
     mock_result = _make_analysis_result(str(img))
     bom_data = {"components": [{"ref": "U1"}]}
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.bom.generate_bom", return_value=bom_data):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.bom.generate_bom", return_value=bom_data):
         result = runner.invoke(main, ["--quiet", "scan", str(img), "--bom"])
     assert result.exit_code == 0
     # In quiet mode, BOM line should not appear
@@ -1508,7 +1508,7 @@ def test_export_default_output_dir(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
         result = runner.invoke(main, ["export", str(img)], catch_exceptions=False)
     assert result.exit_code == 0
     assert "myboard_export" in result.output
@@ -1542,8 +1542,8 @@ def test_glitch_json(runner, tmp_path):
          "mitre_attack": ["T1200"], "remediation": "Add voltage supervisor"},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.glitch_surface.detect_glitch_surfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.glitch_surface.detect_glitch_surfaces",
                return_value=findings):
         result = runner.invoke(main, ["glitch", str(img), "--json"])
     assert result.exit_code == 0
@@ -1557,8 +1557,8 @@ def test_glitch_no_findings(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.glitch_surface.detect_glitch_surfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.glitch_surface.detect_glitch_surfaces",
                return_value=[]):
         result = runner.invoke(main, ["glitch", str(img)])
     assert result.exit_code == 0
@@ -1578,8 +1578,8 @@ def test_glitch_text_output(runner, tmp_path):
          "mitre_attack": ["T1200"], "remediation": "Add voltage supervisor"},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.glitch_surface.detect_glitch_surfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.glitch_surface.detect_glitch_surfaces",
                return_value=findings):
         result = runner.invoke(main, ["glitch", str(img)])
     assert result.exit_code == 0
@@ -1602,8 +1602,8 @@ def test_glitch_output_file(runner, tmp_path):
          "mitre_attack": ["T1200"], "remediation": "Use metal-lidded package"},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.glitch_surface.detect_glitch_surfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.glitch_surface.detect_glitch_surfaces",
                return_value=findings):
         result = runner.invoke(main, ["glitch", str(img), "-o", str(out)])
     assert result.exit_code == 0
@@ -1638,8 +1638,8 @@ def test_extract_json(runner, tmp_path):
          ]},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.firmware_extract.generate_extraction_guide",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.firmware_extract.generate_extraction_guide",
                return_value=guides):
         result = runner.invoke(main, ["extract", str(img), "--json"])
     assert result.exit_code == 0
@@ -1653,8 +1653,8 @@ def test_extract_text_output(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.firmware_extract.generate_extraction_guide",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.firmware_extract.generate_extraction_guide",
                return_value=[]):
         result = runner.invoke(main, ["extract", str(img)])
     assert result.exit_code == 0
@@ -1671,8 +1671,8 @@ def test_extract_output_file(runner, tmp_path):
          "commands": []},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.export.firmware_extract.generate_extraction_guide",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.export.firmware_extract.generate_extraction_guide",
                return_value=guides):
         result = runner.invoke(main, ["extract", str(img), "--json", "-o", str(out)])
     assert result.exit_code == 0
@@ -1708,8 +1708,8 @@ def test_boot_mode_json(runner, tmp_path):
          "mitre_attack": ["T1200"]},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.boot_mode.detect_boot_mode_pins",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.boot_mode.detect_boot_mode_pins",
                return_value=findings):
         result = runner.invoke(main, ["boot-mode", str(img), "--json"])
     assert result.exit_code == 0
@@ -1722,8 +1722,8 @@ def test_boot_mode_no_findings(runner, tmp_path):
     img.write_bytes(b"\x89PNG\r\n\x1a\n")
     mock_result = _make_analysis_result(str(img))
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.boot_mode.detect_boot_mode_pins",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.boot_mode.detect_boot_mode_pins",
                return_value=[]):
         result = runner.invoke(main, ["boot-mode", str(img)])
     assert result.exit_code == 0
@@ -1755,8 +1755,8 @@ def test_sigrok_text_output(runner, tmp_path):
          "component_label": "header"},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings):
         result = runner.invoke(main, ["sigrok", str(img)])
     assert result.exit_code == 0
@@ -1774,8 +1774,8 @@ def test_sigrok_sr_output(runner, tmp_path):
          "component_label": "header"},
     ]
 
-    with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result), \
-         patch("retrace.plugins.builtin.debug_interfaces.detect_debug_interfaces",
+    with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result), \
+         patch("pcb2bom.plugins.builtin.debug_interfaces.detect_debug_interfaces",
                return_value=findings):
         result = runner.invoke(main, ["sigrok", str(img), "-o", str(out)])
     assert result.exit_code == 0

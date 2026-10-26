@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from retrace.analysis.attack_path import (
+from pcb2bom.analysis.attack_path import (
     AttackEdge,
     AttackPath,
     format_attack_paths,

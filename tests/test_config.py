@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from retrace.core.config import (
+from pcb2bom.core.config import (
     DEFAULT_CACHE_DIR,
     DEFAULT_CONFIG_DIR,
     DEFAULT_DATA_DIR,

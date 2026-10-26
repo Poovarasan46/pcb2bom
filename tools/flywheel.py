@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-flywheel.py — codexbro flywheel runner for the retrace PCB RE toolkit.
+flywheel.py — codexbro flywheel runner for the pcb2bom PCB RE toolkit.
 
 Orchestrates all improvement flywheels to continuously improve the repo's
 visual showcase. Safe to run repeatedly (idempotent).
@@ -34,7 +34,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 REPO_ROOT = Path(__file__).parent.parent.resolve()
-SRC_DIR = REPO_ROOT / "src" / "retrace"
+SRC_DIR = REPO_ROOT / "src" / "pcb2bom"
 TESTS_DIR = REPO_ROOT / "tests"
 STATE_FILE = REPO_ROOT / ".flywheel_state.json"
 
@@ -241,7 +241,7 @@ def flywheel_coverage(state: dict) -> tuple[bool, str]:
     _header("Coverage flywheel — measure and track")
     result = _run([
         sys.executable, "-m", "pytest",
-        "--cov=retrace", "--cov-report=term",
+        "--cov=pcb2bom", "--cov-report=term",
         "-q", "--tb=no", "--no-header",
     ])
 
@@ -296,14 +296,14 @@ def flywheel_gaps(coverage_output: str = "") -> dict:
     # -- 6a. Zero-coverage modules --
     result = _run([
         sys.executable, "-m", "pytest",
-        "--cov=retrace", "--cov-report=term",
+        "--cov=pcb2bom", "--cov-report=term",
         "-q", "--tb=no", "--no-header",
     ])
     combined = result.stdout + result.stderr
     zero_cov: list[str] = []
     for line in combined.splitlines():
-        # Lines look like: "retrace/cli.py    120     85    29%   ..."
-        m = re.match(r"\s*(retrace[\w/\\\.]+\.py)\s+\d+\s+\d+\s+0%", line)
+        # Lines look like: "pcb2bom/cli.py    120     85    29%   ..."
+        m = re.match(r"\s*(pcb2bom[\w/\\\.]+\.py)\s+\d+\s+\d+\s+0%", line)
         if m:
             zero_cov.append(m.group(1))
     gaps["zero_coverage_modules"] = zero_cov
@@ -647,7 +647,7 @@ def flywheel_design_audit() -> dict:
     output_blocks = content.count("```\n  ") + content.count("```\nTotal") + content.count("```\nTop")
     scores["output_samples"] = min(8, output_blocks * 2 + code_block_count // 3)
 
-    scores["api_examples"] = min(7, content.count("from retrace"))
+    scores["api_examples"] = min(7, content.count("from pcb2bom"))
 
     mitre_refs = content.count("ATT&CK") + content.count("CWE-") + content.count("CVSS")
     scores["security_context"] = min(6, mitre_refs)
@@ -757,7 +757,7 @@ def flywheel_svg_audit() -> dict:
     # Check _IC_PINOUTS coverage
     try:
         sys.path.insert(0, str(REPO_ROOT / "src"))
-        from retrace.export.pinout_diagram import _IC_PINOUTS
+        from pcb2bom.export.pinout_diagram import _IC_PINOUTS
         scores["ic_pinout_coverage"] = min(3, len(_IC_PINOUTS))
         if len(_IC_PINOUTS) < 2:
             issues.append(f"Only {len(_IC_PINOUTS)} IC pinout packages (target: 2+)")
@@ -1024,7 +1024,7 @@ def flywheel_svg_render_check() -> dict:
 
 @click.group()
 def cli() -> None:
-    """retrace flywheel runner — orchestrate continuous improvement loops."""
+    """pcb2bom flywheel runner — orchestrate continuous improvement loops."""
 
 
 @cli.command()
@@ -1036,7 +1036,7 @@ def cli() -> None:
 )
 def run(quick: bool) -> None:
     """Run all improvement flywheels (or --quick subset)."""
-    click.echo(click.style("\nretrace flywheel runner", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel runner", fg="magenta", bold=True))
     click.echo(click.style(f"{'Quick mode' if quick else 'Full mode'} — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", fg="bright_black"))
 
     state = _load_state()
@@ -1268,7 +1268,7 @@ def run(quick: bool) -> None:
 @cli.command()
 def status() -> None:
     """Show flywheel health: last run, current metrics, outstanding gaps."""
-    click.echo(click.style("\nretrace flywheel status", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel status", fg="magenta", bold=True))
     click.echo("")
 
     state = _load_state()
@@ -1354,7 +1354,7 @@ def brain(detailed: bool) -> None:
         return
 
     b = FlywheelBrain()
-    click.echo(click.style("\nretrace flywheel brain", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel brain", fg="magenta", bold=True))
     click.echo(click.style(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", fg="bright_black"))
     click.echo("")
     click.echo(b.format_brain_summary())
@@ -1370,7 +1370,7 @@ def trends(last: int) -> None:
         return
 
     b = FlywheelBrain()
-    click.echo(click.style("\nretrace flywheel trends", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel trends", fg="magenta", bold=True))
     click.echo("")
 
     report = b.get_trend_report()
@@ -1446,7 +1446,7 @@ def heatmap(output: str | None) -> None:
 
     b = FlywheelBrain()
     out_path = Path(output) if output else None
-    click.echo(click.style("\nretrace flywheel heatmap", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel heatmap", fg="magenta", bold=True))
     click.echo("")
     svg = b.generate_heatmap_svg(out_path)
     resolved = out_path if out_path else REPO_ROOT / "docs" / "examples" / "flywheel_heatmap.svg"
@@ -1478,7 +1478,7 @@ def metrics(output: str | None, print_output: bool) -> None:
 
     b = FlywheelBrain()
     out_path = Path(output) if output else None
-    click.echo(click.style("\nretrace flywheel metrics", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel metrics", fg="magenta", bold=True))
     click.echo("")
     prom_text = b.export_prometheus(out_path)
     resolved = out_path if out_path else REPO_ROOT / ".flywheel_metrics.prom"
@@ -1507,7 +1507,7 @@ def auto_fixes(severity: str | None) -> None:
         return
 
     b = FlywheelBrain()
-    click.echo(click.style("\nretrace flywheel auto-fixes", fg="magenta", bold=True))
+    click.echo(click.style("\npcb2bom flywheel auto-fixes", fg="magenta", bold=True))
     click.echo("")
     suggestions = b.suggest_auto_fixes()
     if severity:

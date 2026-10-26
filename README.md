@@ -400,7 +400,7 @@ tests/test_preprocess.py::test_preprocess_image_pipeline PASSED
 
 ## 12. Credits & Acknowledgments
 
-- **re:trace Reference:** Architecture design inspired by [github.com/ericrihm/retrace](https://github.com/ericrihm/retrace) (MIT License). All code in `pcb2bom` is an original, clean-room implementation.
+- **re:trace Reference:** Architecture design inspired by [github.com/ericrihm/pcb2bom](https://github.com/ericrihm/pcb2bom) (MIT License). All code in `pcb2bom` is an original, clean-room implementation.
 - **Computer Vision:** OpenCV (Apache 2.0).
 - **String Matching:** RapidFuzz (MIT License).
 - **Data Engineering:** Pandas & OpenPyXL.

@@ -1,4 +1,4 @@
-"""Tests for retrace.web — Gradio web UI stub."""
+"""Tests for pcb2bom.web — Gradio web UI stub."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def _launch_with_gr_mock(share=False, port=7860, btn_click_spy=None):
     """
     import sys
 
-    import retrace.core.pipeline  # noqa: F401 — ensure cached before patch.dict removes it
+    import pcb2bom.core.pipeline  # noqa: F401 — ensure cached before patch.dict removes it
 
     gr, demo = _make_gr_mock()
 
@@ -48,13 +48,13 @@ def _launch_with_gr_mock(share=False, port=7860, btn_click_spy=None):
 
     # Keep pipeline in the patched sys.modules so it is NOT re-imported inside
     # the with-block (which would cause numpy to be loaded a second time).
-    pipeline_mod = sys.modules["retrace.core.pipeline"]
+    pipeline_mod = sys.modules["pcb2bom.core.pipeline"]
 
     with patch.dict(
         "sys.modules",
-        {"gradio": gr, "retrace.core.pipeline": pipeline_mod},
+        {"gradio": gr, "pcb2bom.core.pipeline": pipeline_mod},
     ):
-        import retrace.web as web_mod
+        import pcb2bom.web as web_mod
         web_mod.launch(share=share, port=port)
 
     return demo
@@ -68,7 +68,7 @@ def test_launch_default_signature():
     """launch() should accept share and port keyword arguments with correct defaults."""
     import inspect
 
-    from retrace.web import launch
+    from pcb2bom.web import launch
 
     sig = inspect.signature(launch)
     params = sig.parameters
@@ -82,7 +82,7 @@ def test_launch_returns_none_annotation():
     """launch() must be annotated -> None (string form due to __future__ annotations)."""
     import inspect
 
-    from retrace.web import launch
+    from pcb2bom.web import launch
 
     sig = inspect.signature(launch)
     ann = sig.return_annotation
@@ -103,7 +103,7 @@ def test_launch_no_gradio_prints_message(capsys):
             raise ImportError("gradio not installed")
         return real_import(name, *args, **kwargs)
 
-    from retrace.web import launch
+    from pcb2bom.web import launch
 
     with patch("builtins.__import__", side_effect=import_blocker):
         result = launch()
@@ -123,7 +123,7 @@ def test_launch_no_gradio_returns_none():
             raise ImportError("gradio not installed")
         return real_import(name, *args, **kwargs)
 
-    from retrace.web import launch
+    from pcb2bom.web import launch
 
     with patch("builtins.__import__", side_effect=import_blocker):
         result = launch()
@@ -169,7 +169,7 @@ def test_scan_helper_none_image():
     """_scan(None) should return a 3-tuple with a non-empty string as first element."""
     import sys
 
-    import retrace.core.pipeline  # noqa: F401 — ensure cached
+    import pcb2bom.core.pipeline  # noqa: F401 — ensure cached
 
     gr, demo = _make_gr_mock()
     captured_scan: dict = {}
@@ -182,13 +182,13 @@ def test_scan_helper_none_image():
     btn_mock.click = fake_click
     gr.Button.return_value = btn_mock
 
-    pipeline_mod = sys.modules["retrace.core.pipeline"]
+    pipeline_mod = sys.modules["pcb2bom.core.pipeline"]
 
     with patch.dict(
         "sys.modules",
-        {"gradio": gr, "retrace.core.pipeline": pipeline_mod},
+        {"gradio": gr, "pcb2bom.core.pipeline": pipeline_mod},
     ):
-        import retrace.web as web_mod
+        import pcb2bom.web as web_mod
         web_mod.launch()
 
     assert "fn" in captured_scan, "_scan was never registered via btn.click"
@@ -208,7 +208,7 @@ def _capture_scan(pipeline_mock=None):
     """
     import sys
 
-    import retrace.core.pipeline as pipeline_mod_real
+    import pcb2bom.core.pipeline as pipeline_mod_real
 
     gr, demo = _make_gr_mock()
     captured: dict = {}
@@ -219,7 +219,7 @@ def _capture_scan(pipeline_mock=None):
     btn_mock.click = fake_click
     gr.Button.return_value = btn_mock
 
-    pipeline_mod = sys.modules["retrace.core.pipeline"]
+    pipeline_mod = sys.modules["pcb2bom.core.pipeline"]
 
     original_pipeline_cls = pipeline_mod_real.Pipeline
     try:
@@ -228,9 +228,9 @@ def _capture_scan(pipeline_mock=None):
 
         with patch.dict(
             "sys.modules",
-            {"gradio": gr, "retrace.core.pipeline": pipeline_mod},
+            {"gradio": gr, "pcb2bom.core.pipeline": pipeline_mod},
         ):
-            import retrace.web as web_mod
+            import pcb2bom.web as web_mod
             web_mod.launch()
     finally:
         pipeline_mod_real.Pipeline = original_pipeline_cls
@@ -251,7 +251,7 @@ def test_scan_with_image_returns_summary_and_svg():
     _scan = _capture_scan(pipeline_mock=MockPipeline)
     fake_image = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    with patch("retrace.export.svg.generate_svg", return_value="<svg></svg>"):
+    with patch("pcb2bom.export.svg.generate_svg", return_value="<svg></svg>"):
         result = _scan(fake_image)
 
     assert isinstance(result, tuple) and len(result) == 3
@@ -286,7 +286,7 @@ def test_scan_returns_original_image_as_second_element():
     _scan = _capture_scan(pipeline_mock=MockPipeline)
     fake_image = np.zeros((30, 30, 3), dtype=np.uint8)
 
-    with patch("retrace.export.svg.generate_svg", return_value="<svg/>"):
+    with patch("pcb2bom.export.svg.generate_svg", return_value="<svg/>"):
         result = _scan(fake_image)
 
     assert result[1] is fake_image
@@ -299,7 +299,7 @@ def test_scan_returns_original_image_as_second_element():
 def test_launch_with_real_gradio_if_available():
     """If gradio is importable, launch() should complete without raising."""
     pytest.importorskip("gradio")
-    from retrace.web import launch
+    from pcb2bom.web import launch
 
     with patch("gradio.Blocks") as mock_blocks:
         demo = _make_demo_mock()

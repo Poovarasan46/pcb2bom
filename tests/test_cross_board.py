@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from retrace.analysis.cross_board import (
+from pcb2bom.analysis.cross_board import (
     BoardAnalysis,
     BoardComponent,
     BoardTrace,

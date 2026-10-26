@@ -2,7 +2,7 @@
 """Generate a terminal demo SVG for re:trace — no external tools required.
 
 Produces docs/examples/terminal_demo.svg showing a realistic
-`retrace scan board_photo.jpg` session with colorized ANSI output.
+`pcb2bom scan board_photo.jpg` session with colorized ANSI output.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ import html
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# Terminal content — mirrors actual retrace CLI output format
+# Terminal content — mirrors actual pcb2bom CLI output format
 # ---------------------------------------------------------------------------
 
 # Each line is (text, color) where color is an SVG fill value.
@@ -19,7 +19,7 @@ from pathlib import Path
 
 TERM_LINES: list[tuple[str, str | None]] = [
     # prompt
-    ("$ retrace scan board_photo.jpg --output ./results", "#a3e635"),
+    ("$ pcb2bom scan board_photo.jpg --output ./results", "#a3e635"),
     ("", None),
     # header banner
     ("  re:trace v0.1.0 — PCB Reverse Engineering Toolkit", "#60a5fa"),
@@ -119,7 +119,7 @@ def build_svg() -> str:
 
     # Title text centred in chrome
     title_y = CHROME_H // 2 + 5
-    title = f'<text x="{WIDTH // 2}" y="{title_y}" fill="#94a3b8" text-anchor="middle" font-size="13">retrace — board_photo.jpg</text>'
+    title = f'<text x="{WIDTH // 2}" y="{title_y}" fill="#94a3b8" text-anchor="middle" font-size="13">pcb2bom — board_photo.jpg</text>'
 
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg"\n'

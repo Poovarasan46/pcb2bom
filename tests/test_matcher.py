@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 
-import retrace.identification.matcher as matcher_mod
-from retrace.core.pipeline import Component
-from retrace.identification.matcher import identify_components, lookup_part
+import pcb2bom.identification.matcher as matcher_mod
+from pcb2bom.core.pipeline import Component
+from pcb2bom.identification.matcher import identify_components, lookup_part
 
 # ---------------------------------------------------------------------------
 # Tests: lookup_part()

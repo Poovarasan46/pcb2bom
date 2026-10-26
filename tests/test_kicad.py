@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace
-from retrace.export.kicad import (
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
+from pcb2bom.export.kicad import (
     _build_nets,
     _footprint_for,
     _pin_count,

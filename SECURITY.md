@@ -36,7 +36,7 @@ We follow responsible disclosure. If you need more time before public disclosure
 
 **In scope:**
 
-- The re:trace CLI and Python library (`src/retrace/`)
+- The re:trace CLI and Python library (`src/pcb2bom/`)
 - Parsing and analysis pipelines (component detection, trace extraction, BOM generation)
 - Dependency vulnerabilities that affect re:trace users
 

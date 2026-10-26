@@ -3,30 +3,26 @@ requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "retrace-pcb"
-version = "0.3.0"
-description = "AI-powered PCB reverse engineering toolkit — component detection, trace extraction, security assessment"
+name = "pcb2bom"
+version = "0.1.0"
+description = "AI-powered PCB component detection, OCR marking extraction, and engineering Bill of Materials generator"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
-authors = [{name = "Eric Rihm", email = "hello@cobaltsystems.io"}]
+authors = [{name = "Poovarasan V"}]
 keywords = [
-    "pcb", "reverse-engineering", "computer-vision", "hardware-security",
-    "firmware-analysis", "jtag", "swd", "uart", "spi", "i2c",
-    "entropy-analysis", "fault-injection", "cvss", "iot-security",
+    "pcb", "bom", "computer-vision", "ocr", "yolo", "bill-of-materials",
+    "electronics", "hardware", "component-detection"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
-    "Intended Audience :: Information Technology",
+    "Intended Audience :: Manufacturing",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Image Recognition",
-    "Topic :: Security",
-    "Topic :: Security :: Cryptography",
     "Typing :: Typed",
 ]
 dependencies = [
@@ -35,22 +31,23 @@ dependencies = [
     "opencv-python>=4.8",
     "Pillow>=10.0",
     "requests>=2.31",
+    "rapidfuzz>=3.0",
+    "pandas>=2.0",
+    "openpyxl>=3.1",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]
 detection = [
     "ultralytics>=8.1",
     "onnxruntime>=1.16",
-    "scikit-image>=0.21",
 ]
 ocr = [
     "easyocr>=1.7",
-]
-web = [
-    "gradio>=4.0",
+    "pytesseract>=0.3.10",
 ]
 all = [
-    "retrace-pcb[detection,ocr,web]",
+    "pcb2bom[detection,ocr]",
 ]
 dev = [
     "pytest>=7.4",
@@ -60,20 +57,20 @@ dev = [
 ]
 
 [project.scripts]
-retrace = "retrace.cli:main"
+pcb2bom = "pcb2bom.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/ericrihm/retrace"
-Documentation = "https://github.com/ericrihm/retrace#readme"
-Issues = "https://github.com/ericrihm/retrace/issues"
+Homepage = "https://github.com/Poovarasan46/pcb2bom"
+Documentation = "https://github.com/Poovarasan46/pcb2bom#readme"
+Issues = "https://github.com/Poovarasan46/pcb2bom/issues"
 
-[project.entry-points."retrace.plugins"]
-debug_interfaces = "retrace.plugins.builtin.debug_interfaces:DebugInterfaceAnalyzer"
-glitch_surface = "retrace.plugins.builtin.glitch_surface:GlitchSurfaceAnalyzer"
-boot_mode = "retrace.plugins.builtin.boot_mode:BootModeAnalyzer"
+[project.entry-points."pcb2bom.plugins"]
+debug_interfaces = "pcb2bom.plugins.builtin.debug_interfaces:DebugInterfaceAnalyzer"
+glitch_surface = "pcb2bom.plugins.builtin.glitch_surface:GlitchSurfaceAnalyzer"
+boot_mode = "pcb2bom.plugins.builtin.boot_mode:BootModeAnalyzer"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "pcb2bom"]
 
 [tool.ruff]
 target-version = "py310"
@@ -84,4 +81,4 @@ select = ["E", "F", "W", "I", "UP"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["pcb2bom/tests", "tests"]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from retrace.analysis.constraint_solver import (
+from pcb2bom.analysis.constraint_solver import (
     NET_GROUND,
     NET_POWER,
     ComponentSpec,

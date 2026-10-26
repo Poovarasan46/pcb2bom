@@ -16,12 +16,12 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from retrace.core.pipeline import Trace
+from pcb2bom.core.pipeline import Trace
 
 # Guard: OpenCV is required for any test in this file
 cv2 = pytest.importorskip("cv2", reason="OpenCV required for trace extractor tests")
 
-from retrace.detection.trace_extractor import extract_traces_from_image  # noqa: E402
+from pcb2bom.detection.trace_extractor import extract_traces_from_image  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Synthetic image helpers
@@ -297,14 +297,14 @@ class TestExtractTracesFileAPI:
 
     def test_file_not_found_raises(self, tmp_path):
         """Nonexistent path raises FileNotFoundError."""
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         missing = str(tmp_path / "no_such_file.png")
         with pytest.raises(FileNotFoundError, match="Image not found"):
             extract_traces(missing)
 
     def test_unreadable_file_raises_value_error(self, tmp_path):
         """A file that exists but cannot be decoded raises ValueError."""
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         bad_file = tmp_path / "garbage.png"
         bad_file.write_bytes(b"this is not a valid image")
         with pytest.raises(ValueError, match="Could not decode image"):
@@ -314,7 +314,7 @@ class TestExtractTracesFileAPI:
         """A valid PNG image returns a dict with 'count' and 'traces' keys."""
         import cv2
 
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         img = _image_with_horizontal_line(h=100, w=200, thickness=8)
         img_path = str(tmp_path / "test.png")
         cv2.imwrite(img_path, img)
@@ -327,7 +327,7 @@ class TestExtractTracesFileAPI:
         """count field matches len(traces) list."""
         import cv2
 
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         img = _image_with_horizontal_line(h=100, w=200, thickness=8)
         img_path = str(tmp_path / "test.png")
         cv2.imwrite(img_path, img)
@@ -338,7 +338,7 @@ class TestExtractTracesFileAPI:
         """Each trace dict has id, points, width_px, from_component, to_component."""
         import cv2
 
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         img = _image_with_horizontal_line(h=100, w=200, thickness=8)
         img_path = str(tmp_path / "test.png")
         cv2.imwrite(img_path, img)
@@ -354,7 +354,7 @@ class TestExtractTracesFileAPI:
         """A black image produces count=0 and empty traces list."""
         import cv2
 
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         img = _blank_black_image(100, 100)
         img_path = str(tmp_path / "black.png")
         cv2.imwrite(img_path, img)
@@ -367,7 +367,7 @@ class TestExtractTracesFileAPI:
 
         import cv2
 
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         img = _blank_black_image(50, 50)
         img_path = tmp_path / "path_obj.png"
         cv2.imwrite(str(img_path), img)
@@ -376,7 +376,7 @@ class TestExtractTracesFileAPI:
 
     def test_cv2_unavailable_raises_import_error(self, tmp_path):
         """If cv2 is not installed, extract_traces raises ImportError with helpful message."""
-        from retrace.detection.trace_extractor import extract_traces
+        from pcb2bom.detection.trace_extractor import extract_traces
         # Write a real file so we get past the existence check
         dummy = tmp_path / "dummy.png"
         dummy.write_bytes(b"\x89PNG\r\n")
@@ -417,7 +417,7 @@ class TestSkeletonizeSkimagePath:
         mask = cv2.inRange(hsv, lo, hi)
 
         # Create a fake skimage.morphology module with a real skeletonize impl
-        from retrace.detection.trace_extractor import _skeletonize
+        from pcb2bom.detection.trace_extractor import _skeletonize
 
         (mask > 0).astype(np.uint8) * 255  # identity passthrough
 

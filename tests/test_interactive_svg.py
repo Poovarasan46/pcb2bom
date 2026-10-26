@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace
-from retrace.export.svg import (
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
+from pcb2bom.export.svg import (
     _LAYER_DEFS,
     _PRESET_DEFS,
     _render_grid_reference,
@@ -288,7 +288,7 @@ class TestScript:
 
 class TestStyleModes:
     def test_style_defs_rendered(self):
-        from retrace.export.svg import _render_style_defs
+        from pcb2bom.export.svg import _render_style_defs
         css = _render_style_defs()
         assert ".style-photo" in css
         assert ".style-schematic" in css

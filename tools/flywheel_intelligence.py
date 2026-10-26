@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-flywheel_intelligence.py — Self-improving intelligence layer for retrace flywheels.
+flywheel_intelligence.py — Self-improving intelligence layer for pcb2bom flywheels.
 
 P0 (safety + fuel): Shadow Scoring, Active Learning Feedback
 P1 (steering): Innovation Meta-Learning, Source Quality, Calibration, Confidence
 P2 (optimization): Warm-Start cache, Trends/Observability (CUSUM + sparklines)
 
-No external dependencies beyond Python stdlib + numpy (already a retrace dep).
+No external dependencies beyond Python stdlib + numpy (already a pcb2bom dep).
 """
 from __future__ import annotations
 
@@ -78,13 +78,13 @@ FLYWHEEL_DEPS: dict[str, list[str]] = {
     "stats": ["tools/readme_stats.py", "README.md"],
     "lint": ["src/", "tests/"],
     "tests": ["src/", "tests/"],
-    "demo": ["tools/generate_demo.py", "src/retrace/export/"],
+    "demo": ["tools/generate_demo.py", "src/pcb2bom/export/"],
     "coverage": ["src/", "tests/"],
     "gaps": ["src/", "tests/"],
     "regression": [],  # always runs (uses state)
-    "component_db": ["src/retrace/identification/matcher.py"],
+    "component_db": ["src/pcb2bom/identification/matcher.py"],
     "design_audit": ["README.md"],
-    "svg_audit": ["src/retrace/export/svg.py", "src/retrace/export/pinout_diagram.py", "src/retrace/export/bom.py"],
+    "svg_audit": ["src/pcb2bom/export/svg.py", "src/pcb2bom/export/pinout_diagram.py", "src/pcb2bom/export/bom.py"],
     "readme_format": ["README.md"],
     "svg_render": ["docs/examples/"],
 }
@@ -769,7 +769,7 @@ class FlywheelBrain:
         """Generate a GitHub-style 52-week x 7-day contribution heatmap SVG.
 
         Reads .flywheel_history.jsonl, aggregates daily flywheel score deltas,
-        and renders a self-contained SVG using the retrace dark theme.
+        and renders a self-contained SVG using the pcb2bom dark theme.
 
         Cell intensity encodes the aggregate flywheel score delta for that day:
         - Improvements: dark blue (#111827) through cyan (#22d3ee) to green (#22c55e)
@@ -982,10 +982,10 @@ class FlywheelBrain:
         """Export all flywheel intelligence metrics in Prometheus text exposition format.
 
         Writes gauge metrics for:
-        - retrace_flywheel_score: current score per flywheel (from calibration history)
-        - retrace_flywheel_ci_width: 95% CI width per flywheel
-        - retrace_source_reliability: EMA reliability per data source
-        - retrace_bandit_effectiveness: Thompson Sampling arm effectiveness per flywheel
+        - pcb2bom_flywheel_score: current score per flywheel (from calibration history)
+        - pcb2bom_flywheel_ci_width: 95% CI width per flywheel
+        - pcb2bom_source_reliability: EMA reliability per data source
+        - pcb2bom_bandit_effectiveness: Thompson Sampling arm effectiveness per flywheel
 
         Args:
             output_path: Where to write the .prom file.
@@ -999,36 +999,36 @@ class FlywheelBrain:
 
         lines: list[str] = []
 
-        # ── retrace_flywheel_score ────────────────────────────────────────────
-        lines.append("# HELP retrace_flywheel_score Current flywheel score")
-        lines.append("# TYPE retrace_flywheel_score gauge")
+        # ── pcb2bom_flywheel_score ────────────────────────────────────────────
+        lines.append("# HELP pcb2bom_flywheel_score Current flywheel score")
+        lines.append("# TYPE pcb2bom_flywheel_score gauge")
         for fw in self.ALL_FLYWHEELS:
             cal_history = self.calibrator.calibration.get(fw, {}).get("raw_history", [])
             score = cal_history[-1] if cal_history else 0.0
-            lines.append(f'retrace_flywheel_score{{flywheel="{fw}"}} {score}')
+            lines.append(f'pcb2bom_flywheel_score{{flywheel="{fw}"}} {score}')
 
-        # ── retrace_flywheel_ci_width ─────────────────────────────────────────
-        lines.append("# HELP retrace_flywheel_ci_width 95% confidence interval width")
-        lines.append("# TYPE retrace_flywheel_ci_width gauge")
+        # ── pcb2bom_flywheel_ci_width ─────────────────────────────────────────
+        lines.append("# HELP pcb2bom_flywheel_ci_width 95% confidence interval width")
+        lines.append("# TYPE pcb2bom_flywheel_ci_width gauge")
         for fw in self.ALL_FLYWHEELS:
             width = self.confidence.ci_width(fw)
-            lines.append(f'retrace_flywheel_ci_width{{flywheel="{fw}"}} {width}')
+            lines.append(f'pcb2bom_flywheel_ci_width{{flywheel="{fw}"}} {width}')
 
-        # ── retrace_source_reliability ────────────────────────────────────────
-        lines.append("# HELP retrace_source_reliability Data source reliability EMA")
-        lines.append("# TYPE retrace_source_reliability gauge")
+        # ── pcb2bom_source_reliability ────────────────────────────────────────
+        lines.append("# HELP pcb2bom_source_reliability Data source reliability EMA")
+        lines.append("# TYPE pcb2bom_source_reliability gauge")
         for sid, sq in self.sources.sources.items():
-            lines.append(f'retrace_source_reliability{{source="{sid}"}} {sq.ema_reliability}')
+            lines.append(f'pcb2bom_source_reliability{{source="{sid}"}} {sq.ema_reliability}')
 
-        # ── retrace_bandit_effectiveness ──────────────────────────────────────
-        lines.append("# HELP retrace_bandit_effectiveness Thompson Sampling arm effectiveness")
-        lines.append("# TYPE retrace_bandit_effectiveness gauge")
+        # ── pcb2bom_bandit_effectiveness ──────────────────────────────────────
+        lines.append("# HELP pcb2bom_bandit_effectiveness Thompson Sampling arm effectiveness")
+        lines.append("# TYPE pcb2bom_bandit_effectiveness gauge")
         for fw in self.ALL_FLYWHEELS:
             if fw in self.learner.arms:
                 eff = self.learner.arms[fw].effectiveness
             else:
                 eff = 0.5  # uninformed prior: α=1, β=1 → 0.5
-            lines.append(f'retrace_bandit_effectiveness{{flywheel="{fw}"}} {eff}')
+            lines.append(f'pcb2bom_bandit_effectiveness{{flywheel="{fw}"}} {eff}')
 
         text = "\n".join(lines) + "\n"
         output_path.write_text(text, encoding="utf-8")
@@ -1055,7 +1055,7 @@ class FlywheelBrain:
         # We infer from calibration history: a gaps score < 100 means issues exist.
         # We also scan source directly for files without test counterparts so we
         # can name them concretely.
-        src_dir = REPO_ROOT / "src" / "retrace"
+        src_dir = REPO_ROOT / "src" / "pcb2bom"
         tests_dir = REPO_ROOT / "tests"
         if src_dir.exists():
             for src_file in sorted(src_dir.rglob("*.py")):
@@ -1082,7 +1082,7 @@ class FlywheelBrain:
                     })
 
         # ── 2. component_db: missing categories ──────────────────────────────
-        matcher_path = REPO_ROOT / "src" / "retrace" / "identification" / "matcher.py"
+        matcher_path = REPO_ROOT / "src" / "pcb2bom" / "identification" / "matcher.py"
         if matcher_path.exists():
             content = matcher_path.read_text(encoding="utf-8")
             import re as _re
@@ -1134,7 +1134,7 @@ class FlywheelBrain:
                     ),
                     "auto_fixable": False,
                     "fix_template": (
-                        "> **retrace** — reverse-engineer PCB attack surfaces "
+                        "> **pcb2bom** — reverse-engineer PCB attack surfaces "
                         "from X-ray / optical scans."
                     ),
                 })
@@ -1165,7 +1165,7 @@ class FlywheelBrain:
                         "block (friction reduction)"
                     ),
                     "auto_fixable": True,
-                    "fix_template": "```bash\npip install retrace\n```",
+                    "fix_template": "```bash\npip install pcb2bom\n```",
                 })
 
         # ── 4. svg_render: structural issues ─────────────────────────────────

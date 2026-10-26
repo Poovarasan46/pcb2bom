@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 import zipfile
 
-from retrace.export.sigrok import (
+from pcb2bom.export.sigrok import (
     format_sigrok_summary,
     generate_sigrok_metadata,
     generate_sigrok_session,

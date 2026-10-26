@@ -1,11 +1,11 @@
-"""Tests for retrace.plugins.base — plugin protocol, discovery, and runner."""
+"""Tests for pcb2bom.plugins.base — plugin protocol, discovery, and runner."""
 
 from __future__ import annotations
 
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from retrace.plugins.base import AnalyzerPlugin, discover_plugins, run_plugins
+from pcb2bom.plugins.base import AnalyzerPlugin, discover_plugins, run_plugins
 
 # ---------------------------------------------------------------------------
 # Protocol structural tests
@@ -67,7 +67,7 @@ def test_discover_plugins_returns_list():
 
 def test_discover_plugins_empty_when_no_entry_points():
     """When no entry points are registered, an empty list is returned."""
-    with patch("retrace.plugins.base.importlib.metadata.entry_points", return_value=[]):
+    with patch("pcb2bom.plugins.base.importlib.metadata.entry_points", return_value=[]):
         result = discover_plugins()
     assert result == []
 
@@ -78,7 +78,7 @@ def test_discover_plugins_skips_failed_load():
     bad_ep.name = "broken_plugin"
     bad_ep.load.side_effect = ImportError("missing dep")
 
-    with patch("retrace.plugins.base.importlib.metadata.entry_points", return_value=[bad_ep]):
+    with patch("pcb2bom.plugins.base.importlib.metadata.entry_points", return_value=[bad_ep]):
         result = discover_plugins()
 
     assert result == []
@@ -86,7 +86,7 @@ def test_discover_plugins_skips_failed_load():
 
 def test_discover_plugins_recovers_from_discovery_exception():
     """If entry_points() itself raises, discover_plugins() returns []."""
-    with patch("retrace.plugins.base.importlib.metadata.entry_points", side_effect=Exception("no metadata")):
+    with patch("pcb2bom.plugins.base.importlib.metadata.entry_points", side_effect=Exception("no metadata")):
         result = discover_plugins()
     assert result == []
 
@@ -112,7 +112,7 @@ def test_discover_plugins_loads_valid_plugin_class():
     good_ep.name = "valid_plugin"
     good_ep.load.return_value = ValidPlugin
 
-    with patch("retrace.plugins.base.importlib.metadata.entry_points", return_value=[good_ep]):
+    with patch("pcb2bom.plugins.base.importlib.metadata.entry_points", return_value=[good_ep]):
         result = discover_plugins()
 
     assert ValidPlugin in result
@@ -229,7 +229,7 @@ def test_run_plugins_uses_class_name_when_name_attr_missing():
 
 def test_run_plugins_calls_discover_when_no_list_provided():
     """When plugin_classes=None, run_plugins() calls discover_plugins()."""
-    with patch("retrace.plugins.base.discover_plugins", return_value=[]) as mock_discover:
+    with patch("pcb2bom.plugins.base.discover_plugins", return_value=[]) as mock_discover:
         run_plugins(MagicMock())
     mock_discover.assert_called_once()
 
@@ -242,7 +242,7 @@ def test_discover_plugins_skips_non_type_load_result():
     # load() returns an instance (not a class), so isinstance(cls, type) is False
     non_type_ep.load.return_value = object()  # instance, not type
 
-    with patch("retrace.plugins.base.importlib.metadata.entry_points",
+    with patch("pcb2bom.plugins.base.importlib.metadata.entry_points",
                return_value=[non_type_ep]):
         result = discover_plugins()
 

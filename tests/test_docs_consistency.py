@@ -75,7 +75,7 @@ class TestShowcaseStats:
     def test_cli_commands_stat_matches(self, showcase_content):
         m = re.search(r'<div class="stat-val"[^>]*>(\d+)</div><div class="stat-label">CLI Commands</div>', showcase_content)
         assert m, "CLI Commands stat not found in showcase"
-        from retrace.cli import main
+        from pcb2bom.cli import main
         actual = len(main.commands)
         assert int(m.group(1)) == actual, (
             f"Showcase says {m.group(1)} CLI commands, actual: {actual}"

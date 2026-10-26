@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import html
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace
-from retrace.export.html_report import generate_html_report, save_html_report
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace
+from pcb2bom.export.html_report import generate_html_report, save_html_report
 
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
@@ -433,7 +433,7 @@ class TestClassifyNet:
         )
 
     def test_debug_net_via_jtag_marking(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "J1": Component(id="J1", label="header", confidence=0.9, bbox=(0, 0, 10, 10), marking="JTAG"),
             "U1": Component(id="U1", label="ic", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -442,7 +442,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "debug"
 
     def test_power_net_via_vcc_marking(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "U1": Component(id="U1", label="ic", confidence=0.9, bbox=(0, 0, 10, 10), marking="VCC"),
             "C1": Component(id="C1", label="capacitor", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -451,7 +451,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "power"
 
     def test_power_net_via_wide_trace(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "R1": Component(id="R1", label="resistor", confidence=0.9, bbox=(0, 0, 10, 10)),
             "R2": Component(id="R2", label="resistor", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -460,7 +460,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "power"
 
     def test_clock_net(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "X1": Component(id="X1", label="crystal", confidence=0.9, bbox=(0, 0, 10, 10), marking="XTAL"),
             "U1": Component(id="U1", label="ic", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -469,7 +469,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "clock"
 
     def test_ground_net(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "GND": Component(id="GND", label="test_point", confidence=0.9, bbox=(0, 0, 5, 5), marking="GND"),
             "R1": Component(id="R1", label="resistor", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -478,7 +478,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "ground"
 
     def test_data_net(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "U1": Component(id="U1", label="ic", confidence=0.9, bbox=(0, 0, 10, 10), marking="MOSI"),
             "U2": Component(id="U2", label="ic", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -487,7 +487,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "data"
 
     def test_signal_net_fallback(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map = {
             "R1": Component(id="R1", label="resistor", confidence=0.9, bbox=(0, 0, 10, 10)),
             "R2": Component(id="R2", label="resistor", confidence=0.9, bbox=(20, 20, 10, 10)),
@@ -496,7 +496,7 @@ class TestClassifyNet:
         assert _classify_net(trace, comp_map) == "signal"
 
     def test_unknown_component_refs(self):
-        from retrace.export.html_report import _classify_net
+        from pcb2bom.export.html_report import _classify_net
         comp_map: dict = {}
         trace = self._make_trace("MISSING_A", "MISSING_B")
         # Should not raise; falls back to "signal"
@@ -506,33 +506,33 @@ class TestClassifyNet:
 
 class TestCvssGaugeSvg:
     def test_no_score_returns_empty(self):
-        from retrace.export.html_report import _cvss_gauge_svg
+        from pcb2bom.export.html_report import _cvss_gauge_svg
         assert _cvss_gauge_svg(0) == ""
         assert _cvss_gauge_svg(0.0) == ""
 
     def test_high_score_red(self):
-        from retrace.export.html_report import _cvss_gauge_svg
+        from pcb2bom.export.html_report import _cvss_gauge_svg
         svg = _cvss_gauge_svg(8.5)
         assert "#ef4444" in svg  # high severity red
 
     def test_medium_score_yellow(self):
-        from retrace.export.html_report import _cvss_gauge_svg
+        from pcb2bom.export.html_report import _cvss_gauge_svg
         svg = _cvss_gauge_svg(5.5)
         assert "#f59e0b" in svg  # medium yellow
 
     def test_low_score_blue(self):
-        from retrace.export.html_report import _cvss_gauge_svg
+        from pcb2bom.export.html_report import _cvss_gauge_svg
         svg = _cvss_gauge_svg(2.5)
         assert "#3b82f6" in svg  # low blue
 
 
 class TestAttackChainSvg:
     def test_empty_returns_empty_string(self):
-        from retrace.export.html_report import _attack_chain_svg
+        from pcb2bom.export.html_report import _attack_chain_svg
         assert _attack_chain_svg([]) == ""
 
     def test_single_path_renders_svg(self):
-        from retrace.export.html_report import _attack_chain_svg
+        from pcb2bom.export.html_report import _attack_chain_svg
         paths = [("JTAG", "MCU", "Physical access")]
         svg = _attack_chain_svg(paths)
         assert svg.startswith("<svg")
@@ -541,7 +541,7 @@ class TestAttackChainSvg:
         assert "MCU" in svg
 
     def test_multiple_paths(self):
-        from retrace.export.html_report import _attack_chain_svg
+        from pcb2bom.export.html_report import _attack_chain_svg
         paths = [
             ("JTAG", "MCU", "Step 1"),
             ("UART", "CPU", "Step 2"),
@@ -573,19 +573,19 @@ class TestAttackPathsInReport:
 
 class TestRiskMatrixSvg:
     def test_empty_findings_returns_empty(self):
-        from retrace.export.html_report import _risk_matrix_svg
+        from pcb2bom.export.html_report import _risk_matrix_svg
         # No findings → no parts → empty string
         assert _risk_matrix_svg([]) == ""
 
     def test_single_high_finding(self):
-        from retrace.export.html_report import _risk_matrix_svg
+        from pcb2bom.export.html_report import _risk_matrix_svg
         findings = [{"severity": "HIGH"}]
         bar = _risk_matrix_svg(findings)
         assert "risk-bar" in bar
         assert "#ef4444" in bar
 
     def test_mixed_severities(self):
-        from retrace.export.html_report import _risk_matrix_svg
+        from pcb2bom.export.html_report import _risk_matrix_svg
         findings = [
             {"severity": "HIGH"},
             {"severity": "MEDIUM"},

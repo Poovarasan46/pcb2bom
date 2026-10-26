@@ -8,7 +8,7 @@ import time
 import numpy as np
 import pytest
 
-from retrace.core.pipeline import AnalysisResult, Component, Pipeline, Trace
+from pcb2bom.core.pipeline import AnalysisResult, Component, Pipeline, Trace
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -174,8 +174,8 @@ def test_record_learnings_records_identified_parts():
         ],
     )
 
-    with patch("retrace.learning.engine.record_detection") as mock_rec, \
-         patch("retrace.learning.engine.queue_for_sourcing") as mock_queue:
+    with patch("pcb2bom.learning.engine.record_detection") as mock_rec, \
+         patch("pcb2bom.learning.engine.queue_for_sourcing") as mock_queue:
         p = Pipeline(config={"enable_learning": True})
         p._record_learnings(result)
 
@@ -205,7 +205,7 @@ def test_run_cross_board_populates_pattern_matches():
     """_run_cross_board converts components/traces and populates pattern_matches."""
     from unittest.mock import MagicMock, patch
 
-    from retrace.analysis.cross_board import BoardAnalysis, PatternMatch
+    from pcb2bom.analysis.cross_board import BoardAnalysis, PatternMatch
 
     result = AnalysisResult(
         image_path="board.jpg",
@@ -238,7 +238,7 @@ def test_run_cross_board_populates_pattern_matches():
     mock_engine_instance.analyse.return_value = fake_analysis
     mock_engine_instance.to_dict.return_value = {"patterns": []}
 
-    with patch("retrace.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance), \
+    with patch("pcb2bom.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance), \
          patch("pathlib.Path.exists", return_value=False), \
          patch("pathlib.Path.mkdir"), \
          patch("pathlib.Path.write_text"):
@@ -271,7 +271,7 @@ def test_run_cross_board_loads_persisted_state():
     """_run_cross_board loads engine state from disk when the file exists."""
     from unittest.mock import MagicMock, patch
 
-    from retrace.analysis.cross_board import BoardAnalysis
+    from pcb2bom.analysis.cross_board import BoardAnalysis
 
     result = AnalysisResult(image_path="board.jpg", components=[], traces=[])
 
@@ -282,7 +282,7 @@ def test_run_cross_board_loads_persisted_state():
     mock_engine_instance.analyse.return_value = fake_analysis
     mock_engine_instance.to_dict.return_value = {"patterns": []}
 
-    with patch("retrace.analysis.cross_board.CrossBoardEngine") as mock_cls, \
+    with patch("pcb2bom.analysis.cross_board.CrossBoardEngine") as mock_cls, \
          patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.read_text", return_value=saved_state), \
          patch("pathlib.Path.mkdir"), \
@@ -366,7 +366,7 @@ def test_save_svg(tmp_path):
     from unittest.mock import patch
 
     result = _make_result(n_components=2)
-    with patch("retrace.export.svg.generate_interactive_svg", return_value="<svg/>") as mock_svg:
+    with patch("pcb2bom.export.svg.generate_interactive_svg", return_value="<svg/>") as mock_svg:
         result.save(tmp_path, fmt="svg")
     out = tmp_path / "annotated.svg"
     assert out.exists()
@@ -492,7 +492,7 @@ def test_detect_components_yolo_success():
     p = Pipeline()
     img = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    with patch("retrace.detection.detector.YOLODetector", return_value=mock_detector):
+    with patch("pcb2bom.detection.detector.YOLODetector", return_value=mock_detector):
         result = p._detect_components(img)
 
     assert result == fake_comps
@@ -506,7 +506,7 @@ def test_detect_components_falls_back_on_import_error():
     img = np.zeros((100, 100, 3), dtype=np.uint8)
     fallback_comps = [Component(id="C0000", label="resistor", confidence=0.5, bbox=(0, 0, 5, 5))]
 
-    with patch.dict("sys.modules", {"retrace.detection.detector": None}), \
+    with patch.dict("sys.modules", {"pcb2bom.detection.detector": None}), \
          patch.object(p, "_detect_contours", return_value=fallback_comps) as mock_contour:
         result = p._detect_components(img)
 
@@ -601,7 +601,7 @@ def test_read_markings_success():
     p = Pipeline()
     img = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    with patch.dict("sys.modules", {"retrace.detection.ocr": mock_module}):
+    with patch.dict("sys.modules", {"pcb2bom.detection.ocr": mock_module}):
         result = p._read_markings(img, comps)
 
     assert result == marked
@@ -618,7 +618,7 @@ def test_extract_traces_success():
     p = Pipeline()
     img = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    with patch.dict("sys.modules", {"retrace.detection.trace_extractor": mock_module}):
+    with patch.dict("sys.modules", {"pcb2bom.detection.trace_extractor": mock_module}):
         result = p._extract_traces(img)
 
     assert result == fake_traces
@@ -635,7 +635,7 @@ def test_identify_components_success():
 
     p = Pipeline()
 
-    with patch.dict("sys.modules", {"retrace.identification.matcher": mock_module}):
+    with patch.dict("sys.modules", {"pcb2bom.identification.matcher": mock_module}):
         result = p._identify_components(comps)
 
     assert result == identified
@@ -652,8 +652,8 @@ def test_run_cross_board_import_error():
     result = AnalysisResult(image_path="board.jpg", components=[], traces=[])
 
     with patch.dict("sys.modules", {
-        "retrace.analysis.cross_board": None,
-        "retrace.analysis": None,
+        "pcb2bom.analysis.cross_board": None,
+        "pcb2bom.analysis": None,
     }):
         p = Pipeline()
         p._run_cross_board(result)
@@ -665,7 +665,7 @@ def test_run_cross_board_corrupted_state_fallback():
     """_run_cross_board falls back to fresh engine when persisted state is corrupt."""
     from unittest.mock import MagicMock, patch
 
-    from retrace.analysis.cross_board import BoardAnalysis
+    from pcb2bom.analysis.cross_board import BoardAnalysis
 
     result = AnalysisResult(image_path="board.jpg", components=[], traces=[])
     fake_analysis = BoardAnalysis(matches=[], novel_components=[], coverage=0.0)
@@ -674,7 +674,7 @@ def test_run_cross_board_corrupted_state_fallback():
     mock_engine_instance.analyse.return_value = fake_analysis
     mock_engine_instance.to_dict.return_value = {"patterns": []}
 
-    with patch("retrace.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance) as mock_cls, \
+    with patch("pcb2bom.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance) as mock_cls, \
          patch("pathlib.Path.exists", return_value=True), \
          patch("pathlib.Path.read_text", return_value="NOT VALID JSON {{{"), \
          patch("pathlib.Path.mkdir"), \
@@ -690,7 +690,7 @@ def test_run_cross_board_traces_with_connections():
     """_run_cross_board includes traces that have from_component and to_component."""
     from unittest.mock import MagicMock, patch
 
-    from retrace.analysis.cross_board import BoardAnalysis
+    from pcb2bom.analysis.cross_board import BoardAnalysis
 
     result = AnalysisResult(
         image_path="board.jpg",
@@ -708,7 +708,7 @@ def test_run_cross_board_traces_with_connections():
     mock_engine_instance.analyse.return_value = fake_analysis
     mock_engine_instance.to_dict.return_value = {}
 
-    with patch("retrace.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance), \
+    with patch("pcb2bom.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance), \
          patch("pathlib.Path.exists", return_value=False), \
          patch("pathlib.Path.mkdir"), \
          patch("pathlib.Path.write_text"):
@@ -727,7 +727,7 @@ def test_run_cross_board_state_save_failure():
     """_run_cross_board logs a warning when persisted state cannot be written."""
     from unittest.mock import MagicMock, patch
 
-    from retrace.analysis.cross_board import BoardAnalysis
+    from pcb2bom.analysis.cross_board import BoardAnalysis
 
     result = AnalysisResult(image_path="board.jpg", components=[], traces=[])
     fake_analysis = BoardAnalysis(matches=[], novel_components=[], coverage=0.0)
@@ -736,7 +736,7 @@ def test_run_cross_board_state_save_failure():
     mock_engine_instance.analyse.return_value = fake_analysis
     mock_engine_instance.to_dict.return_value = {}
 
-    with patch("retrace.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance), \
+    with patch("pcb2bom.analysis.cross_board.CrossBoardEngine", return_value=mock_engine_instance), \
          patch("pathlib.Path.exists", return_value=False), \
          patch("pathlib.Path.mkdir"), \
          patch("pathlib.Path.write_text", side_effect=OSError("disk full")):
@@ -762,7 +762,7 @@ def test_record_learnings_success_path():
         ],
     )
 
-    with patch.dict("sys.modules", {"retrace.learning.engine": mock_module}):
+    with patch.dict("sys.modules", {"pcb2bom.learning.engine": mock_module}):
         p = Pipeline()
         p._record_learnings(result)
 
@@ -781,7 +781,7 @@ def test_record_learnings_no_components():
         ],
     )
 
-    with patch.dict("sys.modules", {"retrace.learning.engine": mock_module}):
+    with patch.dict("sys.modules", {"pcb2bom.learning.engine": mock_module}):
         p = Pipeline()
         p._record_learnings(result)
 
@@ -799,7 +799,7 @@ def test_record_learnings_import_error():
             Component(id="U1", label="ic", confidence=0.9, bbox=(0, 0, 10, 10), part_number="LM7805"),
         ],
     )
-    with patch.dict("sys.modules", {"retrace.learning": None, "retrace.learning.engine": None}):
+    with patch.dict("sys.modules", {"pcb2bom.learning": None, "pcb2bom.learning.engine": None}):
         p = Pipeline()
         p._record_learnings(result)  # should not raise
 
@@ -812,7 +812,7 @@ def test_read_markings_import_error():
     p = Pipeline()
     img = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    with patch.dict("sys.modules", {"retrace.detection.ocr": None}):
+    with patch.dict("sys.modules", {"pcb2bom.detection.ocr": None}):
         result = p._read_markings(img, comps)
 
     assert result == comps
@@ -825,7 +825,7 @@ def test_extract_traces_import_error():
     p = Pipeline()
     img = np.zeros((100, 100, 3), dtype=np.uint8)
 
-    with patch.dict("sys.modules", {"retrace.detection.trace_extractor": None}):
+    with patch.dict("sys.modules", {"pcb2bom.detection.trace_extractor": None}):
         result = p._extract_traces(img)
 
     assert result == []
@@ -838,7 +838,7 @@ def test_identify_components_import_error():
     comps = [Component(id="U1", label="ic", confidence=0.9, bbox=(0, 0, 10, 10))]
     p = Pipeline()
 
-    with patch.dict("sys.modules", {"retrace.identification.matcher": None}):
+    with patch.dict("sys.modules", {"pcb2bom.identification.matcher": None}):
         result = p._identify_components(comps)
 
     assert result == comps

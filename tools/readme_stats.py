@@ -26,7 +26,7 @@ import click
 
 REPO_ROOT = Path(__file__).parent.parent.resolve()
 README = REPO_ROOT / "README.md"
-SRC_DIR = REPO_ROOT / "src" / "retrace"
+SRC_DIR = REPO_ROOT / "src" / "pcb2bom"
 
 
 # ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ def _collect_pytest_stats() -> tuple[int, str]:
                 for node in _ast.walk(tree):
                     if isinstance(node, (_ast.Import, _ast.ImportFrom)):
                         mod = getattr(node, "module", None) or ""
-                        if mod.startswith("retrace."):
+                        if mod.startswith("pcb2bom."):
                             parts = mod.split(".")
                             mod_path = REPO_ROOT / "src" / Path(*parts[:-1]) / f"{parts[-1]}.py"
                             pkg_path = REPO_ROOT / "src" / Path(*parts) / "__init__.py"
@@ -80,7 +80,7 @@ def _collect_pytest_stats() -> tuple[int, str]:
         cov_result = subprocess.run(
             [
                 sys.executable, "-m", "pytest",
-                "--cov=retrace", "--cov-report=term",
+                "--cov=pcb2bom", "--cov-report=term",
                 "-q", "--no-header", "--tb=no",
             ] + ignore_args,
             capture_output=True, text=True, cwd=REPO_ROOT,
@@ -97,7 +97,7 @@ def _collect_pytest_stats() -> tuple[int, str]:
 
 
 def _collect_loc() -> int:
-    """Return total lines of Python source code under src/retrace."""
+    """Return total lines of Python source code under src/pcb2bom."""
     try:
         find = subprocess.run(
             ["find", str(SRC_DIR), "-name", "*.py"],
@@ -126,7 +126,7 @@ def _collect_loc() -> int:
 
 
 def _collect_modules() -> int:
-    """Count non-__init__.py .py files in src/retrace."""
+    """Count non-__init__.py .py files in src/pcb2bom."""
     return sum(
         1
         for p in SRC_DIR.rglob("*.py")
@@ -142,7 +142,7 @@ def _collect_component_db_size() -> int:
         if src_path not in sys.path:
             sys.path.insert(0, src_path)
         import importlib
-        mod = importlib.import_module("retrace.identification.matcher")
+        mod = importlib.import_module("pcb2bom.identification.matcher")
         db: list = getattr(mod, "_COMPONENT_DB", [])
         return len(db)
     except Exception:
@@ -156,7 +156,7 @@ def _collect_cross_board_patterns() -> int:
         if src_path not in sys.path:
             sys.path.insert(0, src_path)
         import importlib
-        mod = importlib.import_module("retrace.analysis.cross_board")
+        mod = importlib.import_module("pcb2bom.analysis.cross_board")
         fn = getattr(mod, "_builtin_patterns", None)
         if fn is not None:
             return len(fn())
@@ -177,7 +177,7 @@ def _collect_debug_signatures() -> int:
         if src_path not in sys.path:
             sys.path.insert(0, src_path)
         import importlib
-        mod = importlib.import_module("retrace.plugins.builtin.debug_interfaces")
+        mod = importlib.import_module("pcb2bom.plugins.builtin.debug_interfaces")
         patterns: dict = getattr(mod, "_INTERFACE_PATTERNS", {})
         return len(patterns)
     except Exception:
@@ -349,7 +349,7 @@ def sync_showcase(dry_run: bool) -> None:
         src_path = str(REPO_ROOT / "src")
         if src_path not in sys.path:
             sys.path.insert(0, src_path)
-        from retrace.cli import main as cli_main
+        from pcb2bom.cli import main as cli_main
         cli_count = len(cli_main.commands)
     except Exception:
         pass

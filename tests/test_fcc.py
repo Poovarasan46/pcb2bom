@@ -1,4 +1,4 @@
-"""Tests for retrace.sources.fcc — FCC filing scraper."""
+"""Tests for pcb2bom.sources.fcc — FCC filing scraper."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import requests
 
-from retrace.sources.fcc import (
+from pcb2bom.sources.fcc import (
     _ext_from_content_type,
     _ext_from_url,
     _PhotoLinkParser,
@@ -146,14 +146,14 @@ class TestSearchFcc:
 
     def test_returns_results_from_html(self):
         html = '<a href="/FCC-ID/2ABCD-TEST">Test Device</a>'
-        with patch("retrace.sources.fcc.requests.get", return_value=self._mock_response(html)):
+        with patch("pcb2bom.sources.fcc.requests.get", return_value=self._mock_response(html)):
             results = search_fcc("Test Device")
         assert len(results) == 1
         assert results[0]["fcc_id"] == "2ABCD-TEST"
 
     def test_falls_back_to_registry_on_network_error(self):
-        with patch("retrace.sources.fcc.requests.get", side_effect=requests.RequestException("timeout")):
-            with patch("retrace.sources.device_registry.search_registry", return_value=[]) as mock_reg:
+        with patch("pcb2bom.sources.fcc.requests.get", side_effect=requests.RequestException("timeout")):
+            with patch("pcb2bom.sources.device_registry.search_registry", return_value=[]) as mock_reg:
                 results = search_fcc("anything")
         mock_reg.assert_called_once_with("anything")
         assert results == []
@@ -161,8 +161,8 @@ class TestSearchFcc:
     def test_falls_back_to_registry_when_no_results(self):
         """If parser finds no FCC IDs, fall back to local registry."""
         empty_html = "<html><body><p>No results</p></body></html>"
-        with patch("retrace.sources.fcc.requests.get", return_value=self._mock_response(empty_html)):
-            with patch("retrace.sources.device_registry.search_registry", return_value=[]) as mock_reg:
+        with patch("pcb2bom.sources.fcc.requests.get", return_value=self._mock_response(empty_html)):
+            with patch("pcb2bom.sources.device_registry.search_registry", return_value=[]) as mock_reg:
                 results = search_fcc("nothing")
         mock_reg.assert_called_once()
         assert results == []
@@ -178,8 +178,8 @@ class TestSearchFcc:
         family = MagicMock()
         family.manufacturer = "Acme"
 
-        with patch("retrace.sources.fcc.requests.get", side_effect=requests.RequestException):
-            with patch("retrace.sources.device_registry.search_registry", return_value=[(family, [rev])]):
+        with patch("pcb2bom.sources.fcc.requests.get", side_effect=requests.RequestException):
+            with patch("pcb2bom.sources.device_registry.search_registry", return_value=[(family, [rev])]):
                 results = search_fcc("test")
 
         assert len(results) == 1
@@ -204,8 +204,8 @@ class TestSearchFcc:
         family = MagicMock()
         family.manufacturer = "Acme"
 
-        with patch("retrace.sources.fcc.requests.get", side_effect=requests.RequestException):
-            with patch("retrace.sources.device_registry.search_registry",
+        with patch("pcb2bom.sources.fcc.requests.get", side_effect=requests.RequestException):
+            with patch("pcb2bom.sources.device_registry.search_registry",
                        return_value=[(family, [rev1, rev2])]):
                 results = search_fcc("dupe test")
 
@@ -236,8 +236,8 @@ class TestDownloadFccPhotos:
 
     def test_downloads_photo_to_dest(self, tmp_path):
         filing_html = '<a href="/doc/internal.jpg">Internal Photos</a>'
-        with patch("retrace.sources.fcc.requests.get") as mock_get:
-            with patch("retrace.sources.fcc.time.sleep"):
+        with patch("pcb2bom.sources.fcc.requests.get") as mock_get:
+            with patch("pcb2bom.sources.fcc.time.sleep"):
                 mock_get.side_effect = [
                     self._mock_filing_page(filing_html),
                     self._mock_image_response(),
@@ -248,19 +248,19 @@ class TestDownloadFccPhotos:
 
     def test_returns_empty_when_no_photos(self, tmp_path):
         filing_html = "<html><body><p>No photos here</p></body></html>"
-        with patch("retrace.sources.fcc.requests.get", return_value=self._mock_filing_page(filing_html)):
+        with patch("pcb2bom.sources.fcc.requests.get", return_value=self._mock_filing_page(filing_html)):
             paths = download_fcc_photos("2ABCD-NOPHOTO", tmp_path)
         assert paths == []
 
     def test_returns_empty_on_network_error(self, tmp_path):
-        with patch("retrace.sources.fcc.requests.get", side_effect=requests.RequestException("err")):
+        with patch("pcb2bom.sources.fcc.requests.get", side_effect=requests.RequestException("err")):
             paths = download_fcc_photos("BAD-ID", tmp_path)
         assert paths == []
 
     def test_creates_dest_dir(self, tmp_path):
         dest = tmp_path / "subdir" / "fcc"
         filing_html = "<html><body></body></html>"
-        with patch("retrace.sources.fcc.requests.get", return_value=self._mock_filing_page(filing_html)):
+        with patch("pcb2bom.sources.fcc.requests.get", return_value=self._mock_filing_page(filing_html)):
             download_fcc_photos("2ABCD-X", dest)
         assert dest.exists()
 
@@ -273,8 +273,8 @@ class TestDownloadFccPhotos:
         bad_resp = MagicMock()
         bad_resp.raise_for_status.side_effect = requests.HTTPError("404")
 
-        with patch("retrace.sources.fcc.requests.get") as mock_get:
-            with patch("retrace.sources.fcc.time.sleep"):
+        with patch("pcb2bom.sources.fcc.requests.get") as mock_get:
+            with patch("pcb2bom.sources.fcc.time.sleep"):
                 mock_get.side_effect = [
                     self._mock_filing_page(filing_html),
                     bad_resp,

@@ -1,11 +1,11 @@
-"""Tests for retrace.learning.engine — persistent knowledge store."""
+"""Tests for pcb2bom.learning.engine — persistent knowledge store."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-from retrace.learning.engine import (
+from pcb2bom.learning.engine import (
     _load_knowledge,
     _save_knowledge,
     generate_report,

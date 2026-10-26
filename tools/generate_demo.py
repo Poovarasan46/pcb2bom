@@ -1,8 +1,8 @@
 """
-generate_demo.py — Synthetic PCB image generator and retrace pipeline demo runner.
+generate_demo.py — Synthetic PCB image generator and pcb2bom pipeline demo runner.
 
 Generates a realistic-looking PCB image with known component positions, runs the
-retrace analysis pipeline, and writes all demo output files to docs/examples/.
+pcb2bom analysis pipeline, and writes all demo output files to docs/examples/.
 
 Commands
 --------
@@ -28,22 +28,22 @@ import numpy as np
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "src"))
 
-from retrace.core.pipeline import AnalysisResult, Component, Trace  # noqa: E402
-from retrace.analysis.constraint_solver import (  # noqa: E402
+from pcb2bom.core.pipeline import AnalysisResult, Component, Trace  # noqa: E402
+from pcb2bom.analysis.constraint_solver import (  # noqa: E402
     ComponentSpec,
     ConstraintSolver,
     Trace as SolverTrace,
     Pin,
 )
-from retrace.analysis.probe_advisor import (  # noqa: E402
+from pcb2bom.analysis.probe_advisor import (  # noqa: E402
     Component as AdvisorComponent,
     ProbeAdvisor,
 )
-from retrace.export.bom import bom_to_csv, bom_to_json, bom_to_svg, generate_bom  # noqa: E402
-from retrace.export.html_report import generate_html_report  # noqa: E402
-from retrace.export.kicad import generate_kicad_netlist  # noqa: E402
-from retrace.export.svg import generate_svg, generate_attack_surface_svg, generate_zones_svg  # noqa: E402
-from retrace.plugins.builtin.debug_interfaces import detect_debug_interfaces  # noqa: E402
+from pcb2bom.export.bom import bom_to_csv, bom_to_json, bom_to_svg, generate_bom  # noqa: E402
+from pcb2bom.export.html_report import generate_html_report  # noqa: E402
+from pcb2bom.export.kicad import generate_kicad_netlist  # noqa: E402
+from pcb2bom.export.svg import generate_svg, generate_attack_surface_svg, generate_zones_svg  # noqa: E402
+from pcb2bom.plugins.builtin.debug_interfaces import detect_debug_interfaces  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -2147,7 +2147,7 @@ def _generate_one_board(
 
     interactive_svg_path = out / f"{prefix}_interactive.svg"
     click.echo(f"  [+] Writing interactive layered SVG → {interactive_svg_path}")
-    from retrace.export.svg import generate_interactive_svg
+    from pcb2bom.export.svg import generate_interactive_svg
     interactive_svg_str = generate_interactive_svg(
         result, image_href=img_name, title=board_title,
         zones=zones, attack_paths=attack_paths or [],
@@ -2167,8 +2167,8 @@ def _generate_one_board(
         generate_kicad_netlist(result, title=board_title), encoding="utf-8",
     )
 
-    from retrace.export.pinout_diagram import generate_all_pinout_svgs
-    from retrace.plugins.builtin.debug_interfaces import detect_debug_interfaces
+    from pcb2bom.export.pinout_diagram import generate_all_pinout_svgs
+    from pcb2bom.plugins.builtin.debug_interfaces import detect_debug_interfaces
     debug_findings = detect_debug_interfaces(result)
     pinout_svgs = generate_all_pinout_svgs(result, debug_findings, width=760)
     pinout_paths: list[Path] = []

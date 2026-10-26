@@ -7,9 +7,9 @@ from unittest.mock import patch
 
 import pytest
 
-from retrace.core.pipeline import AnalysisResult, Component
-from retrace.export.bom import generate_bom
-from retrace.export.sbom import bom_to_cyclonedx, bom_to_spdx
+from pcb2bom.core.pipeline import AnalysisResult, Component
+from pcb2bom.export.bom import generate_bom
+from pcb2bom.export.sbom import bom_to_cyclonedx, bom_to_spdx
 
 # ---------------------------------------------------------------------------
 # Test fixtures
@@ -81,7 +81,7 @@ class TestSpdxStructure:
         assert any(c.startswith("Tool: retrace-") for c in creators)
 
     def test_creator_includes_version(self):
-        from retrace import __version__
+        from pcb2bom import __version__
         doc = json.loads(bom_to_spdx(_make_bom()))
         creators = doc["creationInfo"]["creators"]
         assert any(__version__ in c for c in creators)
@@ -116,7 +116,7 @@ class TestSpdxNamespace:
         bom = _make_bom()
         doc = json.loads(bom_to_spdx(bom, namespace=""))
         assert "documentNamespace" in doc
-        assert "retrace.tools/sbom" in doc["documentNamespace"]
+        assert "pcb2bom.tools/sbom" in doc["documentNamespace"]
 
     def test_auto_namespace_contains_image_stem(self):
         bom = _make_bom()
@@ -353,7 +353,7 @@ class TestCycloneDxStructure:
         assert "retrace" in names
 
     def test_tool_version_present(self):
-        from retrace import __version__
+        from pcb2bom import __version__
         doc = json.loads(bom_to_cyclonedx(_make_bom()))
         versions = [t.get("version") for t in doc["metadata"]["tools"]]
         assert __version__ in versions
@@ -575,7 +575,7 @@ class TestComponentTypeMapping:
         ("mystery_chip", "device"),
     ])
     def test_type_mapping(self, label: str, expected: str):
-        from retrace.export.sbom import _component_type_cyclonedx
+        from pcb2bom.export.sbom import _component_type_cyclonedx
         assert _component_type_cyclonedx(label) == expected
 
 
@@ -603,7 +603,7 @@ class TestSbomCli:
         return img
 
     def _mock_result(self, image_path: str):
-        from retrace.core.pipeline import AnalysisResult, Component
+        from pcb2bom.core.pipeline import AnalysisResult, Component
         return AnalysisResult(
             image_path=image_path,
             components=[
@@ -614,16 +614,16 @@ class TestSbomCli:
         )
 
     def test_sbom_help(self, runner):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         result = runner.invoke(main, ["sbom", "--help"])
         assert result.exit_code == 0
         assert "IMAGE" in result.output or "sbom" in result.output.lower()
 
     def test_sbom_both_format_writes_two_files(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             result = runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "both",
@@ -634,10 +634,10 @@ class TestSbomCli:
         assert (out / "sbom.cdx.json").exists()
 
     def test_sbom_spdx_only(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             result = runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "spdx",
@@ -648,10 +648,10 @@ class TestSbomCli:
         assert not (out / "sbom.cdx.json").exists()
 
     def test_sbom_cyclonedx_only(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             result = runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "cyclonedx",
@@ -662,10 +662,10 @@ class TestSbomCli:
         assert not (out / "sbom.spdx.json").exists()
 
     def test_sbom_spdx_is_valid_json(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "spdx",
@@ -676,10 +676,10 @@ class TestSbomCli:
         assert doc["spdxVersion"] == "SPDX-2.3"
 
     def test_sbom_cdx_is_valid_json(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "cyclonedx",
@@ -690,11 +690,11 @@ class TestSbomCli:
         assert doc["bomFormat"] == "CycloneDX"
 
     def test_sbom_namespace_forwarded_to_spdx(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
         ns = "https://example.com/custom-ns"
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "spdx",
@@ -705,10 +705,10 @@ class TestSbomCli:
         assert doc["documentNamespace"] == ns
 
     def test_sbom_output_mentions_files(self, runner, board_image, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         out = tmp_path / "out"
         mock_result = self._mock_result(str(board_image))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             result = runner.invoke(main, [
                 "sbom", str(board_image),
                 "--format", "both",
@@ -717,7 +717,7 @@ class TestSbomCli:
         assert "sbom" in result.output.lower()
 
     def test_sbom_missing_file(self, runner):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         result = runner.invoke(main, ["sbom", "/no/such/board.png"])
         assert result.exit_code != 0
 
@@ -733,7 +733,7 @@ class TestExportCli:
         return CliRunner()
 
     def _mock_result(self, image_path: str):
-        from retrace.core.pipeline import AnalysisResult, Component
+        from pcb2bom.core.pipeline import AnalysisResult, Component
         return AnalysisResult(
             image_path=image_path,
             components=[
@@ -744,12 +744,12 @@ class TestExportCli:
         )
 
     def test_export_spdx_writes_file(self, runner, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         img = tmp_path / "board.png"
         img.write_bytes(b"\x89PNG\r\n\x1a\n")
         out = tmp_path / "out"
         mock_result = self._mock_result(str(img))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             result = runner.invoke(main, [
                 "export", str(img),
                 "--format", "spdx",
@@ -759,12 +759,12 @@ class TestExportCli:
         assert (out / "sbom.spdx.json").exists()
 
     def test_export_cyclonedx_writes_file(self, runner, tmp_path):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         img = tmp_path / "board.png"
         img.write_bytes(b"\x89PNG\r\n\x1a\n")
         out = tmp_path / "out"
         mock_result = self._mock_result(str(img))
-        with patch("retrace.core.pipeline.Pipeline.run", return_value=mock_result):
+        with patch("pcb2bom.core.pipeline.Pipeline.run", return_value=mock_result):
             result = runner.invoke(main, [
                 "export", str(img),
                 "--format", "cyclonedx",
@@ -774,13 +774,13 @@ class TestExportCli:
         assert (out / "sbom.cdx.json").exists()
 
     def test_export_help_includes_spdx(self, runner):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         result = runner.invoke(main, ["export", "--help"])
         assert result.exit_code == 0
         assert "spdx" in result.output
 
     def test_export_help_includes_cyclonedx(self, runner):
-        from retrace.cli import main
+        from pcb2bom.cli import main
         result = runner.invoke(main, ["export", "--help"])
         assert result.exit_code == 0
         assert "cyclonedx" in result.output
