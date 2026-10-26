@@ -1,0 +1,104 @@
+[
+  {
+    "image": "board_sample1.png",
+    "width": 800,
+    "height": 600,
+    "components": [
+      {
+        "class": "ic",
+        "bbox": [
+          150,
+          150,
+          350,
+          280
+        ],
+        "expected_ocr": "NE555P",
+        "expected_mpn": "NE555P"
+      },
+      {
+        "class": "capacitor",
+        "bbox": [
+          420,
+          160,
+          470,
+          210
+        ],
+        "expected_ocr": "",
+        "expected_mpn": ""
+      },
+      {
+        "class": "resistor",
+        "bbox": [
+          420,
+          230,
+          480,
+          270
+        ],
+        "expected_ocr": "",
+        "expected_mpn": ""
+      },
+      {
+        "class": "diode",
+        "bbox": [
+          150,
+          340,
+          220,
+          390
+        ],
+        "expected_ocr": "1N4148",
+        "expected_mpn": "1N4148"
+      },
+      {
+        "class": "transistor",
+        "bbox": [
+          270,
+          340,
+          340,
+          400
+        ],
+        "expected_ocr": "2N3904",
+        "expected_mpn": "2N3904"
+      }
+    ]
+  },
+  {
+    "image": "board_sample2.png",
+    "width": 800,
+    "height": 600,
+    "components": [
+      {
+        "class": "ic",
+        "bbox": [
+          220,
+          180,
+          460,
+          360
+        ],
+        "expected_ocr": "STM32F401",
+        "expected_mpn": "STM32F401RET6"
+      },
+      {
+        "class": "ic",
+        "bbox": [
+          540,
+          200,
+          660,
+          290
+        ],
+        "expected_ocr": "AMS1117",
+        "expected_mpn": "AMS1117-3.3"
+      },
+      {
+        "class": "capacitor",
+        "bbox": [
+          540,
+          320,
+          600,
+          370
+        ],
+        "expected_ocr": "",
+        "expected_mpn": ""
+      }
+    ]
+  }
+]

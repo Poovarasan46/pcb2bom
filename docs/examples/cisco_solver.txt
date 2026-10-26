@@ -1,0 +1,97 @@
+re:trace Constraint Solver — Inferred Netlist
+==================================================
+
+Board: CISCO ASA5506-X V05
+Timestamp: 2026-05-01T10:48:57Z
+AC-3 iterations: 122
+
+Net Assignments (684 nodes):
+
+  [POWER]
+    C4.1
+    C_DDR1.1
+    C_DDR2.1
+    C_DDR3.1
+    C_DDR5.1
+    C_DDR7.1
+    C_FPGA1.1
+    C_FPGA2.1
+    C_FPGA6.1
+    C_FPGA7.1
+    C_FPGA8.1
+    C_FPGA9.1
+    C_NET13.1
+    C_NET15.1
+    C_NET16.1
+    C_NET7.1
+    C_NET8.1
+    C_SPI1.1
+    C_SPI2.1
+    C_SPI3.1
+    ... and 43 more
+
+  [GROUND]
+    C4.2
+    C_DDR1.2
+    C_DDR2.2
+    C_DDR3.2
+    C_DDR5.2
+    C_DDR7.2
+    C_FPGA1.2
+    C_FPGA2.2
+    C_FPGA6.2
+    C_FPGA7.2
+    C_FPGA8.2
+    C_FPGA9.2
+    C_NET13.2
+    C_NET15.2
+    C_NET16.2
+    C_NET7.2
+    C_NET8.2
+    C_SPI1.2
+    C_SPI2.2
+    C_SPI3.2
+    ... and 68 more
+
+  [UNKNOWN]
+    C1.1
+    C1.2
+    C2.1
+    C2.2
+    C3.1
+    C3.2
+    C5.1
+    C5.2
+    C6.1
+    C6.2
+    C_CPU1.1
+    C_CPU1.2
+    C_CPU10.1
+    C_CPU10.2
+    C_CPU11.1
+    C_CPU11.2
+    C_CPU12.1
+    C_CPU12.2
+    C_CPU13.1
+    C_CPU13.2
+    ... and 513 more
+
+Inferred Connections (3):
+  U1.VCC  <-->  U11.SW
+  U1.GND  <-->  U6.PROC_RST
+  U6.TRUST_VERIFY  <-->  U11.SW
+
+Ambiguous Nodes (533):
+  U1.DDR3_DQ0
+  U1.DDR3_A0
+  U1.PCIE_TX0
+  U1.PCIE_RX0
+  U1.SATA_TX
+  U1.SATA_RX
+  U1.USB_DP
+  U1.USB_DN
+  U1.SPI_MOSI
+  U1.SPI_MISO
+  ... and 523 more
+
+No constraint conflicts detected.

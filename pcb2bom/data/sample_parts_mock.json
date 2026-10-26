@@ -1,0 +1,98 @@
+[
+  {
+    "mpn": "NE555P",
+    "aliases": ["NE555", "NE555N", "SA555P", "NA555P", "NE555D"],
+    "manufacturer": "Texas Instruments",
+    "description": "Standard Precision Timer, 4.5V to 16V, 500kHz",
+    "package": "DIP-8 / SOIC-8",
+    "datasheet_url": "https://www.ti.com/lit/ds/symlink/ne555.pdf"
+  },
+  {
+    "mpn": "LM358N",
+    "aliases": ["LM358", "LM358P", "LM358D", "LM358DR"],
+    "manufacturer": "Texas Instruments",
+    "description": "Dual Low-Power Operational Amplifier, 3V to 32V",
+    "package": "DIP-8 / SOIC-8",
+    "datasheet_url": "https://www.ti.com/lit/ds/symlink/lm358.pdf"
+  },
+  {
+    "mpn": "STM32F401RET6",
+    "aliases": ["STM32F401", "STM32F401RE", "F401RET6", "STM32F401CCU6"],
+    "manufacturer": "STMicroelectronics",
+    "description": "ARM Cortex-M4 32-bit MCU+FPU, 84 MHz, 512KB Flash, 96KB SRAM",
+    "package": "LQFP-64 (10x10mm)",
+    "datasheet_url": "https://www.st.com/resource/en/datasheet/stm32f401re.pdf"
+  },
+  {
+    "mpn": "ATMEGA328P-PU",
+    "aliases": ["ATMEGA328P", "MEGA328P", "ATMEGA328", "ATMEGA328P-AU"],
+    "manufacturer": "Microchip Technology",
+    "description": "8-bit AVR Microcontroller, 32KB Flash, 20MHz, 23 I/O Pins",
+    "package": "DIP-28 / TQFP-32",
+    "datasheet_url": "https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf"
+  },
+  {
+    "mpn": "ESP32-WROOM-32D",
+    "aliases": ["ESP32-WROOM", "ESP32", "ESP-WROOM-32", "ESP32-D0WDQ6"],
+    "manufacturer": "Espressif Systems",
+    "description": "Wi-Fi & BLE MCU Module, Xtensa dual-core 32-bit LX6, 4MB SPI Flash",
+    "package": "SMD Module (38-pin)",
+    "datasheet_url": "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.pdf"
+  },
+  {
+    "mpn": "AMS1117-3.3",
+    "aliases": ["AMS1117", "AMS1117-3V3", "LM1117-3.3", "1117-3.3"],
+    "manufacturer": "Advanced Monolithic Systems",
+    "description": "1A Low Dropout Voltage Regulator, Fixed 3.3V Output",
+    "package": "SOT-223",
+    "datasheet_url": "http://www.advanced-monolithic.com/pdf/ds1117.pdf"
+  },
+  {
+    "mpn": "CH340G",
+    "aliases": ["CH340", "CH340C", "CH340E", "CH340N"],
+    "manufacturer": "WCH",
+    "description": "USB to Serial UART Interface Chip with Built-in Clock",
+    "package": "SOP-16",
+    "datasheet_url": "https://www.wch-ic.com/downloads/CH340DS1_PDF.html"
+  },
+  {
+    "mpn": "MAX232CSE",
+    "aliases": ["MAX232", "MAX232E", "MAX232IN", "MAX3232"],
+    "manufacturer": "Analog Devices / Maxim",
+    "description": "Dual EIA-232 Drivers and Receivers with Charge Pump",
+    "package": "SOIC-16",
+    "datasheet_url": "https://www.analog.com/media/en/technical-documentation/data-sheets/MAX220-MAX249.pdf"
+  },
+  {
+    "mpn": "MCP2515-I/SO",
+    "aliases": ["MCP2515", "MCP2515-E/SO", "MCP2515-I/P"],
+    "manufacturer": "Microchip Technology",
+    "description": "Stand-Alone CAN Controller with SPI Interface, CAN 2.0B",
+    "package": "SOIC-18",
+    "datasheet_url": "https://ww1.microchip.com/downloads/en/DeviceDoc/21801e.pdf"
+  },
+  {
+    "mpn": "BME280",
+    "aliases": ["BMP280", "BME280-I2C"],
+    "manufacturer": "Bosch Sensortec",
+    "description": "Integrated Environmental Unit: Humidity, Pressure and Temperature Sensor",
+    "package": "LGA-8 (2.5x2.5mm)",
+    "datasheet_url": "https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf"
+  },
+  {
+    "mpn": "2N3904",
+    "aliases": ["MMBT3904", "PZT3904", "2N3904BU"],
+    "manufacturer": "onsemi",
+    "description": "NPN Bipolar General Purpose Transistor, 40V, 200mA",
+    "package": "TO-92 / SOT-23",
+    "datasheet_url": "https://www.onsemi.com/pdf/datasheet/2n3903-d.pdf"
+  },
+  {
+    "mpn": "1N4148",
+    "aliases": ["1N4148W", "1N4148WS", "LL4148", "1N4148-T"],
+    "manufacturer": "Vishay Semiconductors",
+    "description": "Small Signal Fast Switching Diode, 100V, 150mA, 4ns",
+    "package": "DO-35 / SOD-123",
+    "datasheet_url": "https://www.vishay.com/docs/81857/1n4148.pdf"
+  }
+]

@@ -1,0 +1,27 @@
+# pcb2bom - PCB Component Detection & Engineering BoM Generator
+# Requirements specification
+
+# Computer Vision & Core Math
+opencv-python>=4.8.0
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# Detection & Deep Learning (graceful fallbacks provided when uninstalled)
+ultralytics>=8.0.0
+
+# OCR Engines (graceful fallbacks provided when uninstalled)
+easyocr>=1.7.0
+pytesseract>=0.3.10
+
+# Text Matching & BoM Engineering
+rapidfuzz>=3.0.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# Networking & Environment
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Testing & Quality
+pytest>=8.0.0
+pytest-cov>=4.1.0

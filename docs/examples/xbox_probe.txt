@@ -1,0 +1,43 @@
+re:trace Bayesian Probe Advisor — Top 5 Probe Recommendations
+=================================================================
+
+Board: Xbox One Model 1540 — Durango (AMD Liverpool APU, 28nm)
+Timestamp: 2026-05-01T10:48:56Z
+
+Ranked by Expected Information Gain (EIG, bits):
+
+  #1  U1.VCC_CORE
+       Location : (650, 450) px
+       EIG      : 4.2479 bits
+       Rationale: EIG=4.248 bits; most likely net: VCC_CORE (5.3%). Probing U1.VCC_CORE will resolve ~4.25 bits of uncertainty.
+
+  #2  U1.VCC_GFX
+       Location : (650, 450) px
+       EIG      : 4.2479 bits
+       Rationale: EIG=4.248 bits; most likely net: VCC_CORE (5.3%). Probing U1.VCC_GFX will resolve ~4.25 bits of uncertainty.
+
+  #3  U1.VCC_IO
+       Location : (650, 450) px
+       EIG      : 4.2479 bits
+       Rationale: EIG=4.248 bits; most likely net: VCC_CORE (5.3%). Probing U1.VCC_IO will resolve ~4.25 bits of uncertainty.
+
+  #4  U1.GND2
+       Location : (650, 450) px
+       EIG      : 4.2479 bits
+       Rationale: EIG=4.248 bits; most likely net: VCC_CORE (5.3%). Probing U1.GND2 will resolve ~4.25 bits of uncertainty.
+
+  #5  U1.GND3
+       Location : (650, 450) px
+       EIG      : 4.2479 bits
+       Rationale: EIG=4.248 bits; most likely net: VCC_CORE (5.3%). Probing U1.GND3 will resolve ~4.25 bits of uncertainty.
+
+Methodology
+-----------
+The ProbeAdvisor maintains a Dirichlet belief distribution over
+possible net labels for each unknown node. Expected Information
+Gain (EIG) is approximated as H(prior) minus expected posterior
+entropy after observing a measurement — equivalent to mutual
+information I(net_label ; measurement).
+
+Pin-name priors boost probability for power (VCC/VDD) and
+ground (GND/VSS) nets before any measurements are taken.

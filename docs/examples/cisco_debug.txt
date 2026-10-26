@@ -1,0 +1,31 @@
+re:trace Debug Interface Detector
+========================================
+
+Board: CISCO ASA5506-X V05
+Timestamp: 2026-05-01T10:48:57Z
+Total findings: 3  (HIGH=1  MEDIUM=2  LOW=0)
+
+  [HIGH]  JTAG
+         Component : J15  (connector)
+         Marking   : JTAG
+         Detail    : JTAG debug interface — full CPU debug/program access
+         Reference : CWE-1191
+
+  [MEDIUM]  UART
+         Component : J10  (connector)
+         Marking   : CONSOLE
+         Detail    : UART/serial console — may expose bootloader or root shell
+         Reference : CWE-1299
+
+  [MEDIUM]  SPI
+         Component : TP_NEW8  (test_point)
+         Marking   : SPI_CLK
+         Detail    : SPI interface — potential flash memory read/write access
+         Reference : N/A
+
+Methodology
+-----------
+Detection uses keyword matching against component markings and
+labels, cross-referenced with known pin-count signatures for
+JTAG (20/14/10-pin), SWD (10/4/2-pin), UART, SPI, and I2C.
+Severity follows CWE-1191 (debug/test interface exposure).
